@@ -440,10 +440,10 @@ const common = {
       }
       
       const start = (page - 1) * pageSize;
-      const dbClient = process.env.DB_CLIENT || 'mysql2';
-      
+      const dbType = process.env.DB_TYPE || 'mysql';
+
       // 根据数据库类型选择 FIND_IN_SET 的替代方案
-      const findInSetCondition = dbClient === 'better-sqlite3'
+      const findInSetCondition = dbType === 'sqlite'
         ? "INSTR(',' || a.tagId || ',', ',' || t.id || ',') > 0"
         : "FIND_IN_SET(t.id, a.tagId) > 0";
 

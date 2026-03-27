@@ -73,9 +73,9 @@ class CategoryService extends Service {
       .orderBy(`${this.tableName}.orderBy`, "asc");
 
     if (key) {
-      const dbClient = process.env.DB_CLIENT || 'mysql2';
+      const dbType = process.env.DB_TYPE || 'mysql';
       // 根据数据库类型选择查询方式（SQLite 不支持 COLLATE）
-      if (dbClient === 'better-sqlite3') {
+      if (dbType === 'sqlite') {
         query = query.where(`${this.tableName}.name`, 'like', `%${key}%`);
       } else {
         query = query.whereRaw(

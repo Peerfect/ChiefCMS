@@ -43,12 +43,12 @@ class ModelService extends Service {
   }
 
   async findByName(model, tableName) {
-    const dbClient = process.env.DB_CLIENT || 'mysql2';
-    
+    const dbType = process.env.DB_TYPE || 'mysql';
+
     // 根据数据库类型选择查询方式（SQLite 不支持 COLLATE）
     const res = await this.db(this.tableName)
-      .where(dbClient === 'better-sqlite3' ? 'model' : this.db.raw('model COLLATE utf8mb4_general_ci'), 'like', `%${model}%`)
-      .orWhere(dbClient === 'better-sqlite3' ? 'tableName' : this.db.raw('tableName COLLATE utf8mb4_general_ci'), 'like', `%${tableName}%`)
+      .where(dbType === 'sqlite' ? 'model' : this.db.raw('model COLLATE utf8mb4_general_ci'), 'like', `%${model}%`)
+      .orWhere(dbType === 'sqlite' ? 'tableName' : this.db.raw('tableName COLLATE utf8mb4_general_ci'), 'like', `%${tableName}%`)
       .select();
     
     return { success: true, code: 200, msg: '查询成功', data: res };

@@ -203,10 +203,10 @@ class CommentService extends Service {
     const limit = config.spamLimit;
     
     // 兼容 MySQL 和 SQLite 的日期查询
-    const dbClient = process.env.DB_CLIENT || 'mysql2';
+    const dbType = process.env.DB_TYPE || 'mysql';
     let recentComments;
-    
-    if (dbClient === 'better-sqlite3') {
+
+    if (dbType === 'sqlite') {
       // SQLite 使用 datetime 函数
       const cutoffTime = new Date(Date.now() - interval * 1000).toISOString();
       recentComments = await this.db(this.tableName)

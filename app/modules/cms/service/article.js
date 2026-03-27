@@ -677,11 +677,11 @@ class ArticleService extends Service {
   // 统计数据
   async tongji() {
     // 获取7天前的日期（兼容 MySQL 和 SQLite）
-    const dbClient = process.env.DB_CLIENT || 'mysql2';
-    const dateExpr = dbClient === 'better-sqlite3' 
+    const dbType = process.env.DB_TYPE || 'mysql';
+    const dateExpr = dbType === 'sqlite'
       ? "date('now', '-7 days')"
       : "DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
-    
+
     const [week, message, tag, article] = await Promise.all([
       this.db("cms_article")
         .count("* as count")

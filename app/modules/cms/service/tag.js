@@ -91,12 +91,12 @@ class TagService extends Service {
 
   // 搜索
   async search(key = "", page = 1, pageSize = 10) {
-    const dbClient = process.env.DB_CLIENT || 'mysql2';
-    
+    const dbType = process.env.DB_TYPE || 'mysql';
+
     // 根据数据库类型选择查询方式（SQLite 不支持 COLLATE）
     const total = key
       ? await this.db(this.tableName)
-          .where(dbClient === 'better-sqlite3' ? 'name' : this.db.raw('name COLLATE utf8mb4_general_ci'), 'like', `%${key}%`)
+          .where(dbType === 'sqlite' ? 'name' : this.db.raw('name COLLATE utf8mb4_general_ci'), 'like', `%${key}%`)
           .count("id", { as: "count" })
       : await this.db(this.tableName).count("id", { as: "count" });
 
@@ -105,7 +105,7 @@ class TagService extends Service {
       ? await this.db
           .select(["id", "name", "path"])
           .from(this.tableName)
-          .where(dbClient === 'better-sqlite3' ? 'name' : this.db.raw('name COLLATE utf8mb4_general_ci'), 'like', `%${key}%`)
+          .where(dbType === 'sqlite' ? 'name' : this.db.raw('name COLLATE utf8mb4_general_ci'), 'like', `%${key}%`)
           .limit(pageSize)
           .offset(offset)
           .orderBy("id", "desc")
