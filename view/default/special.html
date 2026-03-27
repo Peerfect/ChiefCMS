@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="{{cate?.seoDescription || site.description}}">
+    <meta name="keywords" content="{{cate?.seoKeywords || site.keywords}}" />
+    <meta property="og:title" content="{{cate?.seoTitle || cate?.name}}-{{site.name}}" />
+    <meta property="og:description" content="{{site.description}}" />
+    <title>{{article?.title || cate?.name}}-{{site.name}}</title>
+    {{include './common/meta.html'}}
+</head>
+
+<body class="bg-f8f8f8 pos-r">
+    {{include './common/header.html'}}
+
+    <main class="bg-f2f2f2 pt-10 pb-20 flex">
+        <div class="main center mt-10 flex gap-20">
+            <aside class="flex-1">
+                <section class="notices pd-20 mb-20 bg-fff">
+                    <h3 class="m-title border-dashed f-16 flex justify-between">tag标签</h3>
+                    <p class="mt-10">
+                        {{each tag}}
+                        <a class="el-tag mr-5 mb-5"
+                            href="/tags/{{$value.path}}/tag.html?tag={{$value.name}}">{{$value.name}}</a>
+                        {{/each}}
+                    </p>
+                </section>
+
+                {{if frag.ad}}
+                <section class="ad mb-20 bg-fff">
+                    {{@ frag.ad}}
+                </section>
+                {{/if}}
+
+                <section class="notices pos-s pd-20 mb-20 bg-fff" style="top:80px;z-index: 2;">
+                    <h3 class="m-title border-dashed f-16 flex justify-between bold">{{cate.name}}</h3>
+                    {{if page?.list?.length>0}}
+                    <ul class="mt-10">
+                        {{each page.list}}
+                        <li class="f-16 pt-4 pb-4 flex bold pl-10">
+                            <a href="{{$value.path}}/page-{{$value.id}}.html"
+                                title="{{$value.title}}">{{$value.title}}</a>
+                        </li>
+                        {{/each}}
+                    </ul>
+                    {{/if}}
+                </section>
+            </aside>
+
+            <article class="article-index">
+                <div class="bg-fff radius-6 pd-25 content">
+                    {{if article?.content}}
+                    <header class="border-b pos-r">
+                        <h2 class="f-26 c-252933 bold mt-10">{{article.title}}</h2>
+                        <p class="f-12 c-999 mt-5 mb-26">
+                            <span>
+                                <i class="ico-20 ico-time pos-r t-4"></i> {{ dateFormat(article.updatedAt, 'YYYY-MM-DD HH:mm:ss') }}
+                                <i class="ico-20 ico-admin pos-r t-4 ml-4"></i> {{article.author || site.name}}
+                                <i class="ico-20 ico-view pos-r t-5 ml-4"></i> 阅读（{{article.pv || 0}}）
+                            </span>
+                        </p>
+                    </header>
+                    <article id="article" class="article-cont f-17 lh-35">
+                        <div class="markdown-body">{{@ renderMarkdown(article.content) }}</div>
+                    </article>
+                    {{else}}
+                    <div class="mt-35 mb-35">
+                        <div class="text-c pd-50">
+                            <i class="ico-80 ico-doc pos-r t-5"></i>
+                            <p class="f-18 c-666 mt-20">暂无专题内容</p>
+                            <p class="f-14 c-999 mt-10">当前专题栏目还没有发布任何内容，请稍后再来查看</p>
+                            <a href="/" class="btn-primary mt-20 inline-block">返回首页</a>
+                        </div>
+                    </div>
+                    {{/if}}
+                </div>
+            </article>
+        </div>
+    </main>
+
+    {{include './common/footer.html'}}
+    {{include './common/wap-nav.html'}}
+    {{include './common/js.html'}}
+
+</body>
+
+</html>

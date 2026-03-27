@@ -1,0 +1,47 @@
+<header class="flex header-wrap justify-center flex-wrap pos-r">
+    <div class="header flex align-center justify-between pt-5 pb-5">
+        <h1 class="logo" title="{{site.name}}">
+            <a href="/" class="c-141414">{{site.name}}</a>
+        </h1>
+        {{include './search.html'}}
+        <div class="ico-open" id="menuBtn" title="菜单"></div>
+    </div>
+    <div class="w-1280 center">
+        {{include './nav.html'}}
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function checkLoginStatus() {
+            const un = document.cookie.replace(/(?:(?:^|.*;\s*)un\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+            const ut = document.cookie.replace(/(?:(?:^|.*;\s*)ut\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+            const welcomeText = document.getElementById('welcome-text');
+            const memberCenterBtn = document.getElementById('member-center-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const loginBtn = document.getElementById('login-btn');
+            const registerBtn = document.getElementById('register-btn');
+
+            // 检查元素是否存在，避免报错
+            if (!welcomeText || !memberCenterBtn || !logoutBtn || !loginBtn || !registerBtn) {
+                return;
+            }
+
+            if (un && ut) {
+                welcomeText.style.display = 'inline';
+                welcomeText.textContent = '欢迎，' + un;
+                memberCenterBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'inline-block';
+                loginBtn.style.display = 'none';
+                registerBtn.style.display = 'none';
+            } else {
+                welcomeText.style.display = 'none';
+                memberCenterBtn.style.display = 'none';
+                logoutBtn.style.display = 'none';
+                loginBtn.style.display = 'inline-block';
+                registerBtn.style.display = 'inline-block';
+            }
+        }
+
+        checkLoginStatus();
+    });
+    </script>
+</header>

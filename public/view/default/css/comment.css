@@ -1,0 +1,761 @@
+/* ==================== 评论区域整体样式 ==================== */
+.comment-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+/* ==================== 评论头部 ==================== */
+.comment-section-header {
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.comment-section-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.comment-count {
+  font-size: 14px;
+  color: #999;
+  font-weight: normal;
+  margin-left: 4px;
+}
+
+/* ==================== 主评论输入框 ==================== */
+.main-comment-form {
+  margin-bottom: 24px;
+}
+
+.comment-input-wrapper {
+  background: #f7f8fa;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.comment-input-hint {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 8px;
+}
+
+.comment-input-wrapper textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #e5e6eb;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.comment-input-wrapper textarea:focus {
+  border-color: #1e80ff;
+}
+
+.comment-input-wrapper textarea::placeholder {
+  color: #999;
+}
+
+.comment-input-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.comment-input-tools {
+  display: flex;
+  gap: 12px;
+}
+
+.tool-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #86909c;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.tool-btn:hover {
+  color: #1e80ff;
+}
+
+.tool-btn.emoji-btn:hover {
+  color: #ffb800;
+}
+
+.tool-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.comment-input-submit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.char-count {
+  font-size: 13px;
+  color: #999;
+}
+
+.submit-btn {
+  padding: 8px 20px;
+  background: #1e80ff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #1171ee;
+}
+
+.submit-btn:disabled {
+  background: #bfdbfe;
+  cursor: not-allowed;
+}
+
+/* ==================== 登录提示 ==================== */
+.comment-login-prompt {
+  text-align: center;
+  padding: 40px 0;
+  background: #f7f8fa;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.comment-login-prompt p {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 16px;
+}
+
+.login-btn {
+  display: inline-block;
+  padding: 8px 24px;
+  background: #1e80ff;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.login-btn:hover {
+  background: #1171ee;
+}
+
+/* ==================== 评论列表 ==================== */
+.comment-list {
+  margin-top: 20px;
+}
+
+.comment-empty {
+  text-align: center;
+  padding: 60px 0;
+  color: #999;
+  font-size: 14px;
+}
+
+/* ==================== 主评论项 ==================== */
+.comment-item {
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.comment-main {
+  display: flex;
+  gap: 12px;
+}
+
+.comment-avatar {
+  flex-shrink: 0;
+}
+
+.comment-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.comment-nickname {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.comment-time {
+  font-size: 13px;
+  color: #999;
+}
+
+.comment-body {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #333;
+  margin: 8px 0;
+  word-break: break-word;
+}
+
+.comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.comment-actions button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #86909c;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 4px 0;
+}
+
+.comment-actions button:hover {
+  color: #1e80ff;
+}
+
+.comment-actions button.liked {
+  color: #1e80ff;
+}
+
+.comment-actions button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.comment-like-count {
+  font-size: 13px;
+}
+
+/* ==================== 回复列表 ==================== */
+.comment-replies {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.comment-reply-item {
+  padding: 10px 0;
+}
+
+.comment-reply-item:last-child {
+  border-bottom: none;
+}
+
+.comment-reply-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #333;
+  word-break: break-word;
+}
+
+.comment-reply-body .reply-to {
+  color: #1e80ff;
+  font-weight: 500;
+}
+
+.comment-reply-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.comment-reply-actions .comment-time {
+  font-size: 12px;
+  color: #999;
+  margin-right: auto;
+}
+
+.comment-reply-actions button {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: #86909c;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 2px 0;
+}
+
+.comment-reply-actions button:hover {
+  color: #1e80ff;
+}
+
+.comment-reply-actions button.liked {
+  color: #1e80ff;
+}
+
+.comment-reply-actions button svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ==================== 查看全部按钮 ==================== */
+.view-all-comments,
+.view-all-replies {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 0;
+  font-size: 13px;
+  color: #8590a6;
+  cursor: pointer;
+  transition: color 0.2s;
+  margin-top: 8px;
+}
+
+
+
+.view-all-comments:hover,
+.view-all-replies:hover {
+  color: #175199;
+}
+
+.arrow-icon {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s;
+}
+
+.arrow-icon.up {
+  transform: rotate(180deg);
+}
+
+/* ==================== 回复框 ==================== */
+.reply-box-container {
+  margin-top: 12px;
+}
+
+.reply-box {
+  background: #fff;
+  border: 1px solid #1e80ff;
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.reply-box .reply-to {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 8px;
+}
+
+.reply-box textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.reply-box textarea::placeholder {
+  color: #999;
+}
+
+.reply-box .reply-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.reply-box .reply-tools {
+  display: flex;
+  gap: 12px;
+}
+
+.reply-box .reply-tools button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #86909c;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.reply-box .reply-tools button:hover {
+  color: #1e80ff;
+}
+
+.reply-box .reply-tools button.emoji-btn:hover {
+  color: #ffb800;
+}
+
+.reply-box .reply-tools svg {
+  width: 18px;
+  height: 18px;
+}
+
+.reply-box .reply-submit-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reply-box .char-count {
+  font-size: 13px;
+  color: #999;
+}
+
+.reply-box .btn-submit {
+  padding: 6px 16px;
+  background: #1e80ff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.reply-box .btn-submit:hover:not(:disabled) {
+  background: #1171ee;
+}
+
+.reply-box .btn-submit:disabled {
+  background: #bfdbfe;
+  cursor: not-allowed;
+}
+
+.reply-box .btn-cancel {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 12px;
+  transition: color 0.2s;
+}
+
+.reply-box .btn-cancel:hover {
+  color: #666;
+}
+
+/* ==================== 分页 ==================== */
+.comment-pagination {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.load-more-btn {
+  padding: 10px 32px;
+  font-size: 14px;
+  color: #1e80ff;
+  background: #fff;
+  border: 1px solid #1e80ff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.load-more-btn:hover:not(:disabled) {
+  background: #1e80ff;
+  color: #fff;
+}
+
+.load-more-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==================== Toast 提示 ==================== */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: toast-in 0.3s ease-out;
+  pointer-events: auto;
+  max-width: 300px;
+  text-align: center;
+}
+
+.toast.success {
+  background: rgba(34, 197, 94, 0.9);
+}
+
+.toast.error {
+  background: rgba(239, 68, 68, 0.9);
+}
+
+.toast.info {
+  background: rgba(30, 128, 255, 0.9);
+}
+
+.toast.hiding {
+  animation: toast-out 0.3s ease-in forwards;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* ==================== 隐藏 ==================== */
+.hidden {
+  display: none !important;
+}
+
+/* ==================== 表情选择器 ==================== */
+.emoji-picker {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  background: #fff;
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+}
+
+.emoji-picker-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.emoji-list {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 6px;
+  padding: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: visible;
+  position: relative;
+}
+
+/* 第一行表情的 tooltip 显示在下方 */
+.emoji-item:nth-child(-n+10):hover::after {
+  bottom: auto;
+  top: 100%;
+  margin-bottom: 0;
+  margin-top: 6px;
+}
+
+.emoji-item:nth-child(-n+10):hover::before {
+  bottom: auto;
+  top: 100%;
+  margin-bottom: 0;
+  margin-top: -4px;
+  border-top-color: transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.8);
+}
+
+.emoji-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.emoji-item:hover {
+  background: #f0f0f0;
+}
+
+.emoji-item:hover::after {
+  content: attr(data-title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 6px;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.emoji-item:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  margin-bottom: -4px;
+}
+
+.emoji-item img {
+  width: 24px;
+  height: 24px;
+}
+
+/* 回复框中的表情选择器 */
+.reply-box .emoji-picker {
+  bottom: 36px;
+  left: 0;
+ 
+}
+
+.reply-box .emoji-list {
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+ 
+}
+
+.reply-box .emoji-item {
+  width: 32px;
+  height: 32px;
+}
+
+.reply-box .emoji-item img {
+  width: 22px;
+  height: 22px;
+}
+
+/* 工具栏定位 */
+.comment-input-tools {
+  position: relative;
+}
+
+.reply-tools {
+  position: relative;
+}
+
+/* ==================== 评论内容中的表情图片 ==================== */
+.emoji-in-text {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+/* ==================== 响应式 ==================== */
+@media (max-width: 768px) {
+  .comment-section {
+    padding: 16px;
+  }
+  
+  .comment-avatar img {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .comment-replies {
+    padding: 10px;
+  }
+  
+  .comment-input-wrapper {
+    padding: 12px;
+  }
+  
+  .emoji-picker {
+    width: 280px;
+    left: -10px;
+  }
+  
+  .emoji-list {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}

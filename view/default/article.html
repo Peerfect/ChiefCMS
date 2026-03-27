@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="{{cate.seoDescription || site.description}}">
+    <meta name="keywords" content="{{cate.seoKeywords || site.keywords}}" />
+    <meta property="og:title" content="{{article.title}}-{{cate.name}}-{{site.name}}" />
+    <meta property="og:description" content="{{cate.seoDescription || site.description}}" />
+    <title>{{article.title}}-{{site.name}}</title>
+    {{include './common/meta.html'}}
+
+<body class="bg-f8f8f8">
+    <!-- 头部 -->
+    {{include './common/header.html'}}
+
+    <!-- 头条文章 -->
+    <main class="bg-f2f2f2 pt-10 pb-20 flex">
+
+        <div class="main center mt-10 flex gap-20">
+            <!-- 最新文章 -->
+            <article class="article-index">
+                <div class="bg-fff radius-6 pd-15 mb-1 f-14 c-999">
+                    <i class="ico-20 ico-home pos-r t-3"></i>
+                    <a class="" href="/">首页</a> /
+                    {{each position}}
+                    {{if $index < position.length-1}} <a href="{{$value.path}}/index.html">{{$value.name}}</a> /
+                        {{else}}
+                        <a class="c-666" href="{{$value.path}}/index.html">{{$value.name}}</a>
+                        {{/if}}
+                        {{/each}}
+                </div>
+
+                <div class="bg-fff radius-6 pd-25">
+                    <header class="border-b pos-r">
+                        <h2 class="f-26 c-252933  bold mt-10">
+                            <!-- <i class="ico-20 ico-speech pos-r t-4 ml-4 mr-4" id="audio"></i> -->
+                            {{article.title}}
+                        </h2>
+                        <p class="f-12 mt-5 mb-26 flex justify-between items-center">
+                            <span class="c-999 flex items-center">
+                                <i class="ico-20 ico-time pos-r t-4"></i> 
+                                {{ dateFormat(article.updatedAt, 'YYYY-MM-DD HH:mm:ss') }}
+                                <i class="ico-20 ico-admin pos-r t-4 ml-4"></i> {{article.author}}
+                                <i class="ico-20 ico-view pos-r t-5 ml-4"></i> 阅读（{{article.pv}}）
+                                <!-- <i class="ico-20 ico-zan pos-r t-4 ml-4"></i>点赞（95） -->
+                            </span>
+                            <button id="favorite-btn" class="el-button el-button--small" data-article-id="{{article.id}}">
+                                <i class="ico-20 ico-star pos-r t-4 mr-1"></i>
+                                <span id="favorite-text">收藏</span>
+                            </button>
+                        </p>
+                        {{each article.tags}}
+                        <a class="el-tag mr-5 mb-5" href="/tags/{{$value.name}}.html"
+                            title="{{$value.name}}">{{$value.name}}</a>
+                        {{/each}}
+                    </header>
+
+                    {{if article.description}}
+                    <section class="introduction pd-10 border-6 mb-20 mt-20 lh-25 f-14 bg-f2f2f2">
+                        「导读」{{@ article.description}}
+                    </section>
+                    {{/if}}
+                    <article id="article" data-article-id="{{article.id}}" class="article-cont f-17 lh-35">
+                        <div class="markdown-body">{{@ renderMarkdown(article.content) }}</div>
+                    </article>
+
+                </div>
+
+                <footer class="pd-25 bg-fff radius-6 mt-1 f-14 c-333">
+                    <p>上一篇：
+                        {{if pre}}
+                        <a href="{{pre.path}}/article-{{pre.id}}.html" class="c-666">
+                            {{pre.title}}
+                        </a>
+                        {{else}}
+                        真的没有了
+                        {{/if}}
+                    </p>
+                    <p class="mt-14">下一篇：
+                        {{if next}}
+                        <a href="{{next.path}}/article-{{next.id}}.html" class="c-666">
+                            {{next.title}}
+                        </a>
+                        {{else}}
+                        真的没有了
+                        {{/if}}
+                    </p>
+                </footer>
+
+                <div class="bg-fff radius-6 mt-1 pd-25">
+                    <% include('./partials/comment-section.html') %>
+                </div>
+
+            </article>
+
+            <aside class="article-aside">
+
+                <!-- 最新 -->
+                <section class="notices pd-20 mb-20 bg-fff">
+                    <h3 class="m-title border-dashed f-16 flex justify-between">{{cate.name}}最新文章<span
+                            class="more">more</span>
+                    </h3>
+                    <ul class="mt-10">
+                        {{each news}}
+                        <li class="f-14 pt-4 pb-4 flex justify-between">
+                            <a href="{{$value.path}}/article-{{$value.id}}.html" title="{{$value.title}}">
+                                {{$value.title}}
+                            </a>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </section>
+
+
+                <!-- 图文 热门 -->
+                <section class="notices pd-20 mb-20 bg-fff">
+                    <h3 class="m-title border-dashed f-16 flex justify-between">{{cate.name}}推荐图文</h3>
+                    {{each imgs}}
+                    <figure class="flex justify-between mt-10 ">
+                        {{if $value.img}}
+                        <div class="thumb mb-10">
+                            <img class="w-p100" src="{{$value.img}}" alt="{{$value.title}}" title="{{$value.title}}">
+                        </div>
+                        {{/if}}
+                        <div class="flex-1">
+                            <figcaption class="f-18 ellips-2 bold mt-4">{{$value.title}}</figcaption>
+                            <p class="f-14 ellips-3">
+                                {{@ $value.description}}
+                                <a href="{{$value.path}}/article-{{$value.id}}.html" title="{{$value.title}}">详情
+                                </a>
+                            </p>
+                        </div>
+                    </figure>
+                    {{/each}}
+                </section>
+
+                <!-- 广告 -->
+                <section class="ad mb-20 bg-fff pd-20 lh-30">
+                    {{@ frag.ad || ''}}
+                </section>
+
+                <!-- tag标签 -->
+                <section class="notices pd-20 mb-20 bg-fff">
+                    <h3 class="m-title border-dashed f-16 flex justify-between">tag标签</h3>
+                    <p class="mt-10">
+                        {{each tag}}
+                        <a class="el-tag mr-5 mb-5"
+                            href="/tags/{{$value.path}}/tag.html?tag={{$value.name}}">{{$value.name}}</a>
+                        {{/each}}
+                    </p>
+                </section>
+
+                <section class="notices pd-20 mb-20 bg-fff pos-s" style="top:80px;z-index: 2;">
+                    <h3 class="m-title border-dashed f-16 flex justify-between">目录</h3>
+                    <div class="mt-10" id="article-outline">
+                    </div>
+                </section>
+            </aside>
+        </div>
+    </main>
+
+    <!-- footer -->
+    {{include './common/footer.html'}}
+
+    <!-- 移动端导航 -->
+    {{include './common/wap-nav.html'}}
+
+
+    {{include './common/js.html'}}
+
+    <script src="{{static_url}}/js/katelog.min.js"></script>
+    <script>
+        const katelogIns = new katelog({
+            contentEl: 'article',
+            catelogEl: 'article-outline',
+            linkClass: 'k-catelog-link',
+            linkActiveClass: 'k-catelog-link-active',
+            selector: ['h2', 'h3', 'h4', 'h5', 'h6'],
+            supplyTop: 20,
+            active: function (el) {
+            }
+        });
+        // const html = '<h2>动态添加的标题</h2>'
+        // katelogIns.contentEl.insertAdjacentHTML('afterBegin', html);
+        // katelogIns.rebuild();
+
+        function checkLoginStatus() {
+            const ut = document.cookie.replace(/(?:(?:^|.*;\s*)ut\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+            const favoriteBtn = document.getElementById('favorite-btn');
+
+            if (!favoriteBtn) {
+                console.log('[checkLoginStatus] favoriteBtn not found');
+                return;
+            }
+
+            if (ut) {
+                favoriteBtn.classList.add('el-button--primary');
+                favoriteBtn.classList.remove('el-button--default');
+                favoriteBtn.disabled = false;
+            } else {
+                favoriteBtn.classList.add('el-button--default');
+                favoriteBtn.classList.remove('el-button--primary');
+            }
+        }
+
+        checkLoginStatus();
+
+        // 收藏功能
+        const favoriteBtn = document.getElementById('favorite-btn');
+        const favoriteText = document.getElementById('favorite-text');
+        let isFavorited = false;
+
+        async function checkFavorite() {
+            const ut = document.cookie.replace(/(?:(?:^|.*;\s*)ut\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+            if (!ut) {
+                return;
+            }
+            
+            try {
+                const articleId = favoriteBtn.getAttribute('data-article-id');
+                const response = await fetch('/member/v1/favorites');
+                const result = await response.json();
+                if (result.code === 200 && result.data.list) {
+                    const favorited = result.data.list.some(item => item.article_id == articleId);
+                    if (favorited) {
+                        isFavorited = true;
+                        favoriteBtn.classList.add('el-button--warning');
+                        favoriteBtn.classList.remove('el-button--default');
+                        favoriteBtn.classList.remove('el-button--primary');
+                        favoriteText.textContent = '已收藏';
+                    }
+                }
+            } catch (error) {
+                console.error('检查收藏状态失败:', error);
+            }
+        }
+
+        async function toggleFavorite() {
+            const articleId = favoriteBtn.getAttribute('data-article-id');
+            const articleTitle = document.querySelector('h2').textContent;
+            
+            const ut = document.cookie.replace(/(?:(?:^|.*;\s*)ut\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+            if (!ut) {
+                alert('请先登录');
+                window.location.href = '/user/login.html';
+                return;
+            }
+            
+            try {
+                let response;
+                if (isFavorited) {
+                    const favoriteId = await getFavoriteId(articleId);
+                    if (favoriteId) {
+                        response = await fetch('/member/v1/favorite/delete?id=' + favoriteId, {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+                    } else {
+                        alert('取消收藏失败');
+                        return;
+                    }
+                } else {
+                    response = await fetch('/member/v1/favorite', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            articleId: articleId,
+                            articleTitle: articleTitle,
+                            articleCover: '',
+                            articleSummary: '',
+                            articleUrl: window.location.href
+                        })
+                    });
+                }
+
+                const result = await response.json();
+                if (result.code === 200) {
+                    isFavorited = !isFavorited;
+                    if (isFavorited) {
+                        favoriteBtn.classList.add('el-button--warning');
+                        favoriteBtn.classList.remove('el-button--default');
+                        favoriteBtn.classList.remove('el-button--primary');
+                        favoriteText.textContent = '已收藏';
+                        alert('收藏成功');
+                    } else {
+                        favoriteBtn.classList.remove('el-button--warning');
+                        favoriteBtn.classList.add('el-button--default');
+                        favoriteText.textContent = '收藏';
+                        alert('已取消收藏');
+                    }
+                } else {
+                    alert(result.msg || '操作失败');
+                }
+            } catch (error) {
+                console.error('收藏操作失败:', error);
+                alert('操作失败，请稍后重试');
+            }
+        }
+
+        async function getFavoriteId(articleId) {
+            try {
+                const response = await fetch('/member/v1/favorites');
+                const result = await response.json();
+                if (result.code === 200 && result.data.list) {
+                    const favorite = result.data.list.find(item => item.article_id == articleId);
+                    return favorite ? favorite.id : null;
+                }
+                return null;
+            } catch (error) {
+                console.error('获取收藏ID失败:', error);
+                return null;
+            }
+        }
+
+        if (favoriteBtn) {
+            checkFavorite();
+            favoriteBtn.addEventListener('click', toggleFavorite);
+        }
+
+        // 浏览历史记录 - 使用通用模块
+        (function() {
+            const articleData = {
+                id: '{{article.id}}',
+                title: '{{article.title}}',
+                img: '{{article.img}}'
+            };
+            // 直接调用记录函数
+            if (window.BrowserHistory) {
+                window.BrowserHistory.add(articleData);
+            }
+        })();
+    </script>
+</body>
+
+</html>
