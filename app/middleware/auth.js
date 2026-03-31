@@ -1,9 +1,10 @@
 import { helper } from "chanjs";
 import SysMenu from "../modules/base/service/SysMenu.js";
+const { config } = Chan;
+
 
 const { setToken, getToken } = helper;
-const { config } = Chan;
-const { JWT_SECRET, JWT_EXPIRES_IN, JWT_REFRESH, APP_DEBUG } = config;
+const { JWT_SECRET, JWT_EXPIRES_IN, JWT_REFRESH, } = config;
 
 const REFRESH_THRESHOLD = 30 * 60; // 30分钟
 
@@ -67,7 +68,7 @@ export default () => {
             { 
               httpOnly: true,
               sameSite: 'strict',
-              secure: process.env.NODE_ENV === 'production'
+              secure: process.env.NODE_ENV === 'prd'
             }
           );
         }

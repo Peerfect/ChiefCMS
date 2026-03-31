@@ -1,10 +1,9 @@
 import { Controller, helper, common } from "chanjs";
-import ConfigType from "../service/ConfigType.js";
-
+const { config } = Chan;
 const { setToken, getToken } = helper;
 const { success, fail } = common;
-const { config } = Chan;
 
+import ConfigType from "../service/ConfigType.js";
 class ConfigTypeController extends Controller {
   async list(req, res, next) {
     try {

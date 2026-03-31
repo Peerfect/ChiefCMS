@@ -7,7 +7,7 @@ export const PORT = process.env.PORT || "3000";
 
 export const BODY_LIMIT = process.env.BODY_LIMIT || "100kb";
 export const NODE_ENV = process.env.NODE_ENV || "development";
-export const APP_DEBUG = process.env.APP_DEBUG === "true";
+
 export const PAGE_SIZE = process.env.PAGE_SIZE || 20;
 export const LIMIT_MAX = process.env.LIMIT_MAX || 300;
 
@@ -21,7 +21,6 @@ export default {
 
   BODY_LIMIT,
   NODE_ENV,
-  APP_DEBUG,
   PAGE_SIZE,
   LIMIT_MAX,
 };

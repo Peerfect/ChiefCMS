@@ -1,9 +1,9 @@
-import { Controller, common } from "chanjs";
-import { Paths } from "chanjs";
-import Site from "../service/Site.js";
-
-const { success, fail } = common;
+import { Controller, common, cache, Paths } from "chanjs";
 const { config } = Chan;
+const { success, fail } = common;
+const { CACHE_KEY } = config;
+
+import Site from "../service/Site.js";
 
 class SiteController extends Controller {
   // 查
@@ -21,6 +21,8 @@ class SiteController extends Controller {
     try {
       const body = req.body;
       const result = await Site.updateInfo(body);
+      // 清除缓存
+      cache.del(CACHE_KEY);
      res.json(this.success(result));
     } catch (err) {
       next(err);

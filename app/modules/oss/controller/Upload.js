@@ -4,10 +4,10 @@ import fs from "fs";
 import fsPromises from "fs/promises";
 import AdmZip from "adm-zip";
 import qiniu from "../../cms/service/qiniu.js";
-import { common, Paths } from "chanjs";
-
-const { success, fail } = common;
+import { common, Paths  } from "chanjs";
 const { config } = Chan;
+const { success, fail } = common;
+
 
 const handleResponse = (req, files) => {
   const isArray = Array.isArray(files);

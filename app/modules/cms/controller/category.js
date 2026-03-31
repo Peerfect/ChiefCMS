@@ -1,6 +1,7 @@
-import { Controller, common } from "chanjs";
+import { Controller, common, config, cache } from "chanjs";
 import category from "../service/category.js";
 
+const { CACHE_KEY } = config;
 const { success } = common;
 
 class CategoryController extends Controller {
@@ -42,6 +43,11 @@ class CategoryController extends Controller {
 
   // 清除缓存
   clearCache(req) {
+    // 清除共享缓存实例中的数据
+    if (cache) {
+      cache.del(CACHE_KEY);
+    }
+    // 同时清除 req.app.locals 中的数据
     if (req.app && req.app.locals) {
       delete req.app.locals.nav;
       delete req.app.locals.category;

@@ -1,9 +1,11 @@
 import { Controller, helper, common } from "chanjs";
-import SysMenu from "../service/SysMenu.js";
+
+const { config } = Chan;
 
 const { getToken } = helper;
 const { success, fail } = common;
-const { config } = Chan;
+
+import SysMenu from "../service/SysMenu.js";
 
 class SysMenuController extends Controller {
   async list(req, res, next) {

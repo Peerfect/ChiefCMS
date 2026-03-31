@@ -1,9 +1,10 @@
 import { Controller, helper, common } from "chanjs";
 import SysRole from "../service/SysRole.js";
+const { config } = Chan;
 
 const { getToken } = helper;
 const { success, fail } = common;
-const { config } = Chan;
+
 
 class SysRoleController extends Controller {
   async list(req, res, next) {

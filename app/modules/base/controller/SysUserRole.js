@@ -1,10 +1,10 @@
 import { Controller, helper, common } from "chanjs";
-import SysUserRole from "../service/SysUserRole.js";
+
 
 const { setToken, getToken } = helper;
 const { success, fail } = common;
 const { config } = Chan;
-
+import SysUserRole from "../service/SysUserRole.js";
 class SysUserRoleController extends Controller {
   // 查
   async detail(req, res, next) {

@@ -31,10 +31,6 @@ export default () => {
       // 5. 获取并验证设备信息
       const { _f } = req.cookies;
 
-      // 生产环境移除敏感信息打印
-      // console.log("user-auth-->", uid, fp, ip);
-      // console.log("user-auth--cookies-->", _f, _i);
-
       // 验证设备指纹
       if (_f !== fp) {
         return sendResponse(res, 202, "登录设备异常，请重新登录！");

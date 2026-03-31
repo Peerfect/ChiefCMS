@@ -1,10 +1,9 @@
-import { Controller, helper } from "chanjs";
+import { Controller, helper, common } from "chanjs";
+const { config } = Chan;
+const { setToken, getToken, getIp } = helper;
+import bcrypt from "bcryptjs";
 import SysUser from "../service/SysUser.js";
 import SysMenu from "../service/SysMenu.js";
-import bcrypt from "bcryptjs";
-
-const { setToken, getToken, getIp } = helper;
-const { config } = Chan;
 
 class SysUserController extends Controller {
   async login(req, res, next) {
