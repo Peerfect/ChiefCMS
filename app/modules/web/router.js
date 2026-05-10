@@ -1,6 +1,5 @@
 import { helper } from "chanjs";
 import init from "./middleware/init.js";
-import site from "../../middleware/init.js";
 import adapter from "./middleware/adapter.js";
 import { singleUpload, multiUpload, logo } from "../../common/upload.js";
 
@@ -8,7 +7,6 @@ export default async (app, router, config) => {
   let controller = await helper.loadController("web");
   
   router.use(adapter());
-  router.use(site());
   router.use(init());
 
   // 首页模板

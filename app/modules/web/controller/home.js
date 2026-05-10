@@ -22,9 +22,9 @@ class HomeController extends Controller {
   // 首页
   async index(req, res, next) {
     try {
-      const { nav, template } = req.app.locals;
+      const { nav, template, category } = req.app.locals;
       const defaultView = homeView(nav);
-      const data = await home.home();
+      const data = await home.home(category);
       res.render(`${template}/${defaultView}`, { ...data, nav });
     } catch (error) {
       console.error(error);
@@ -39,7 +39,7 @@ class HomeController extends Controller {
       if (!cid) {
         return await res.render(`${template}/404.html`);
       }
-      const data = await home.list({ cid, page });
+      const data = await home.list({ cid, page, categoryList: category });
       const { pageHtml, view, position, subnav } = listDataParse({
         cid,
         category,
@@ -68,12 +68,9 @@ class HomeController extends Controller {
         await res.render(`${template}/404.html`);
         return;
       }
-      // 文章列表
+      // 文章详情
       const article = await commonService.article(id);
 
-      if (article?.field?.length > 0) {
-        article.field = parseJsonFields(article.field[0]);
-      }
       if (!article) {
         await res.render(`${template}/404.html`);
         return;
@@ -90,7 +87,7 @@ class HomeController extends Controller {
       });
     
       //热门 推荐 图文 上一页 下一页 count
-      const data = await home.article({ id, cid });
+      const data = await home.article({ id, cid, categoryList: category });
 
       await res.render(`${template}/${view}`, {
         ...data,
@@ -123,7 +120,7 @@ class HomeController extends Controller {
       }
 
       // 获取页面数据
-      const pageData = await home.page({ cid });
+      const pageData = await home.page({ cid, categoryList: category });
       const list = pageData?.page?.list || [];
       let article = initialArticle || {};
 

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{article.title}} - {{site.name}}</title>
+    <meta name="keywords" content="{{article.keywords}}">
+    <meta name="description" content="{{article.description}}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="{{static_url}}css/fonts.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#C9A063',
+                        'primary-dark': '#8B6F47',
+                        secondary: '#2D5F5D',
+                        'ink-black': '#1A1A1A',
+                        'ink-gray': '#2C2C2C',
+                        'gold-light': '#E6C896',
+                        'jade': '#7FA99B',
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif SC', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{static_url}}css/common.css">
+</head>
+<body>
+    {{include './common/header.html'}}
+
+    <div class="page-header">
+        <img src="{{static_url}}img/about-bg.jpg" alt="{{article.title}}">
+        <div class="overlay"></div>
+        <div class="container-1440">
+            <h1 class="text-gold-light">{{article.title}}</h1>
+        </div>
+    </div>
+
+    <div class="container-1440 py-16 md:py-24 px-4 md:px-12">
+        {{if article.content}}
+        <div class="max-w-4xl mx-auto">
+            <div class="article-content prose prose-lg max-w-none">
+                {{@article.content}}
+            </div>
+        </div>
+        {{else}}
+        <!-- 默认关于我们内容 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24 scroll-fade-in">
+            <div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">传承文化 · 修身养性</h2>
+                <p class="text-gray-600 leading-relaxed mb-6">
+                    弘道阁成立于2015年，致力于传承和弘扬中华优秀传统文化。我们相信，古老的智慧能够为现代生活提供指引，帮助人们在快节奏的都市生活中找到内心的平静。
+                </p>
+                <p class="text-gray-600 leading-relaxed mb-6">
+                    通过功法修炼、文化游学和国学教育三大核心业务，我们已经帮助超过5000名学员改善身心健康，提升生活品质。
+                </p>
+                <div class="grid grid-cols-3 gap-6 mt-8">
+                    <div class="text-center">
+                        <div class="text-4xl font-black text-primary mb-2">8+</div>
+                        <div class="text-gray-600 text-sm">年专业经验</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-black text-jade mb-2">5000+</div>
+                        <div class="text-gray-600 text-sm">服务学员</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-black text-gold-light mb-2">50+</div>
+                        <div class="text-gray-600 text-sm">专业导师</div>
+                    </div>
+                </div>
+            </div>
+            <div class="relative">
+                <img src="{{static_url}}img/hero-taiji.jpg" alt="弘道阁" class="rounded-3xl shadow-2xl">
+                <div class="absolute -bottom-6 -right-6 w-48 h-48 bg-gradient-to-br from-primary/20 to-jade/20 rounded-3xl -z-10"></div>
+            </div>
+        </div>
+
+        <div class="mb-24 scroll-fade-in">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center">我们的使命</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="w-20 h-20 bg-primary/20 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+                        <i data-lucide="heart" class="w-10 h-10 text-primary"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">传承文化</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        保护和传承中华优秀传统文化，让更多人了解国学精髓
+                    </p>
+                </div>
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="w-20 h-20 bg-jade/20 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+                        <i data-lucide="users" class="w-10 h-10 text-jade"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">服务大众</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        以科学化的教学方法，让传统功法和文化惠及更多人群
+                    </p>
+                </div>
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="w-20 h-20 bg-gold-light/20 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+                        <i data-lucide="trending-up" class="w-10 h-10 text-gold-light"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">创新发展</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        结合现代科学，创新传统文化传播方式，与时俱进
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-fade-in">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center">发展历程</h2>
+            <div class="relative max-w-4xl mx-auto">
+                <div class="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-primary to-transparent"></div>
+                <div class="space-y-12">
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-12 text-right">
+                            <h3 class="text-2xl font-bold text-primary mb-2">2015年</h3>
+                            <p class="text-gray-600">弘道阁在上海成立，开始太极拳教学</p>
+                        </div>
+                        <div class="w-8 h-8 bg-primary rounded-full border-4 border-ink-black z-10"></div>
+                        <div class="w-1/2 pl-12"></div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-12"></div>
+                        <div class="w-8 h-8 bg-jade rounded-full border-4 border-ink-black z-10"></div>
+                        <div class="w-1/2 pl-12">
+                            <h3 class="text-2xl font-bold text-jade mb-2">2018年</h3>
+                            <p class="text-gray-600">拓展游学业务，首次武当山文化之旅</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-12 text-right">
+                            <h3 class="text-2xl font-bold text-gold-light mb-2">2020年</h3>
+                            <p class="text-gray-600">上线国学课堂，推出线上课程</p>
+                        </div>
+                        <div class="w-8 h-8 bg-gold-light rounded-full border-4 border-ink-black z-10"></div>
+                        <div class="w-1/2 pl-12"></div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-12"></div>
+                        <div class="w-8 h-8 bg-primary rounded-full border-4 border-ink-black z-10"></div>
+                        <div class="w-1/2 pl-12">
+                            <h3 class="text-2xl font-bold text-primary mb-2">2024年</h3>
+                            <p class="text-gray-600">学员突破5000人，成为行业标杆</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+
+    {{include './common/float-contact.html'}}
+    {{include './common/footer.html'}}
+
+    <script src="{{static_url}}js/common.js"></script>
+</body>
+</html>

@@ -5,6 +5,7 @@ import tag from "../../cms/service/tag.js";
 import friendlink from "../../cms/service/friendlink.js";
 import article from "../../cms/service/article.js";
 import Api from "../service/Api.js";
+import svgCaptcha from "svg-captcha";
 
 const { tree } = helper;
 const { success, fail } = common;
@@ -254,6 +255,35 @@ class ApiController extends Controller {
       const { id } = req.query;
       const data = await Api.pvadd(id);
       res.json(this.success(data));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * @description 获取图形验证码
+   * @param {*} req
+   * @param {*} res
+   * @param {*} next
+   */
+  async captcha(req, res, next) {
+    try {
+      const captcha = svgCaptcha.create({
+        size: 4,
+        ignoreChars: '0o1iIl',
+        noise: 2,
+        color: true,
+        background: '#f0f0f0',
+        width: 120,
+        height: 40,
+        fontSize: 40
+      });
+      res.cookie('_captcha', captcha.text.toLowerCase(), {
+        maxAge: 300000,
+        httpOnly: true
+      });
+      res.type('svg');
+      res.send(captcha.data);
     } catch (error) {
       next(error);
     }

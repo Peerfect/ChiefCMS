@@ -1,7 +1,7 @@
 {
   "name": "chancms",
   "type": "module",
-  "version": "3.6.0",
+  "version": "3.6.2",
   "description": "ChanCMS是一款基于Node、Express5、MySQL、Vue3研发的高质量实用型CMS系统。",
   "main": "app.js",
   "scripts": {
@@ -19,8 +19,7 @@
   "dependencies": {
     "adm-zip": "^0.5.16",
     "bcryptjs": "^3.0.2",
-    "better-sqlite3": "^12.8.0",
-    "chanjs": "^2.6.11",
+    "chanjs": "^2.6.14",
     "cheerio": "^1.1.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
@@ -32,6 +31,7 @@
     "nodemailer": "^7.0.6",
     "qiniu": "^7.14.0",
     "serve-favicon": "^2.5.1",
+    "svg-captcha": "^1.4.0",
     "xml2js": "^0.6.2",
     "xss": "^1.0.15",
     "zod": "^4.1.11"

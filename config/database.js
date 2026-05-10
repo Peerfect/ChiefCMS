@@ -18,7 +18,7 @@ const defaultMysql = {
 
 const defaultSqlite = {
   key: "primary",
-  client: "better-sqlite3",
+  client: "sqlite3",
   connection: {
     filename: process.env.DB_FILEPATH || "./data/chancms.sqlite"
   },

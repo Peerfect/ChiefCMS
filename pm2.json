@@ -3,6 +3,7 @@
         {
             "name": "ChanCMS",
             "script": "app.js",
+            "args": ["--env-file=.env.prd"],
             "watch": false,
             "ignore_watch": [
                 "public",

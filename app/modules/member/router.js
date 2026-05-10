@@ -1,5 +1,4 @@
 import { helper } from "chanjs";
-import init from "../../middleware/init.js";
 import verifycode from "./middleware/verifycode.js";
 import userauth from "./middleware/userauth.js";
 import auth from "../../middleware/auth.js";
@@ -9,7 +8,6 @@ import commentSecurity from "./middleware/commentSecurity.js";
 export default async (app, router, config) => {
   
   let controller = await helper.loadController("member");
-  router.use(init());
 
   //前端会员接口 
   router.post("/sendEmail", controller.Member.sendEmail);

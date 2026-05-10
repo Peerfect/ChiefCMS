@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联系我们 - {{site.name || '弘道阁'}}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="{{static_url}}css/fonts.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#C9A063',
+                        'primary-dark': '#8B6F47',
+                        secondary: '#2D5F5D',
+                        'ink-black': '#1A1A1A',
+                        'ink-gray': '#2C2C2C',
+                        'gold-light': '#E6C896',
+                        'jade': '#7FA99B',
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif SC', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{static_url}}css/common.css">
+</head>
+<body>
+    {{include './common/header.html'}}
+
+    <div class="page-header">
+        <img src="{{static_url}}img/contact-bg.jpg" alt="联系我们">
+        <div class="overlay"></div>
+        <div class="container-1440">
+            <h1 class="text-primary">联系我们</h1>
+        </div>
+    </div>
+
+    <div class="container-1440 py-16 md:py-24 px-4 md:px-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
+            <div class="scroll-fade-in glass-card rounded-2xl md:rounded-3xl p-4 md:p-10">
+                <h2 class="text-2xl md:text-3xl font-bold mb-2 md:mb-4 text-gray-800">预约咨询</h2>
+                <p class="text-gray-600 mb-4 md:mb-8 text-sm md:text-base">填写以下表单，我们的课程顾问将在24小时内与您联系</p>
+                <form id="contactForm" class="space-y-3 md:space-y-5" onsubmit="return false;">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">问题 <span class="text-red-500">*</span></label>
+                        <input type="text" id="title" name="title" placeholder="请输入您的问题" maxlength="50"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-base">
+                        <p class="text-red-500 text-sm mt-1 hidden" id="titleError">请输入您的问题</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">姓名 <span class="text-red-500">*</span></label>
+                        <input type="text" id="name" name="name" placeholder="请输入您的姓名" required minlength="2" maxlength="20"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-base">
+                        <p class="text-red-500 text-sm mt-1 hidden" id="nameError">请输入2-20个字符的姓名</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">电话 <span class="text-red-500">*</span></label>
+                        <input type="tel" id="phone" name="phone" placeholder="请输入您的电话" required pattern="^1[3-9]\d{9}$"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-base">
+                        <p class="text-red-500 text-sm mt-1 hidden" id="phoneError">请输入正确的11位手机号码</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">留言 <span class="text-red-500">*</span></label>
+                        <textarea id="content" name="content" rows="4" placeholder="请输入您的留言" required minlength="5" maxlength="500"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-base resize-none"></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden" id="contentError">请输入5-500个字符的留言</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">验证码 <span class="text-red-500">*</span></label>
+                        <div class="flex gap-3">
+                            <input type="text" id="captcha" name="captcha" placeholder="请输入验证码" maxlength="4"
+                                class="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-base uppercase">
+                            <img id="captchaImg" src="/api/captcha" alt="验证码"
+                                class="h-12 w-30 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                                title="点击刷新验证码">
+                        </div>
+                        <p class="text-red-500 text-sm mt-1 hidden" id="captchaError">请输入正确的验证码</p>
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn-primary w-full py-4 text-lg font-semibold mt-4 flex items-center justify-center gap-2">
+                        <span>提交预约</span>
+                        <svg id="loadingIcon" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </form>
+
+                <div id="successModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+                    <div class="glass-card rounded-2xl p-8 max-w-sm w-full text-center">
+                        <div class="w-16 h-16 bg-jade/20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i data-lucide="check-circle" class="w-8 h-8 text-jade"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">提交成功</h3>
+                        <p class="text-gray-600 mb-6">感谢您的留言，我们将尽快与您联系！</p>
+                        <button onclick="closeSuccessModal()" class="btn-primary w-full py-3">确定</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scroll-fade-in mt-6 md:mt-0">
+                <h2 class="text-xl md:text-4xl font-bold mb-3 md:mb-8">联系方式</h2>
+                <div class="space-y-3 md:space-y-8">
+                    <div class="glass-card rounded-xl md:rounded-2xl p-4 md:p-8 flex items-start space-x-3 md:space-x-4">
+                        <div class="w-10 h-10 md:w-14 md:h-14 bg-primary/20 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="map-pin" class="w-5 h-5 md:w-7 md:h-7 text-primary"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-base md:text-xl font-bold mb-1 md:mb-2">地址</h4>
+                            {{@ frag.address || '上海市静安区南京西路1266号<br>恒隆广场办公楼2座15楼'}}
+                            <!-- <p class="text-gray-600 text-sm md:text-base">上海市静安区南京西路1266号<br>恒隆广场办公楼2座15楼</p> -->
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl md:rounded-2xl p-4 md:p-8 flex items-start space-x-3 md:space-x-4">
+                        <div class="w-10 h-10 md:w-14 md:h-14 bg-jade/20 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="phone" class="w-5 h-5 md:w-7 md:h-7 text-jade"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-base md:text-xl font-bold mb-1 md:mb-2">电话</h4>
+                            {{@ frag["common:footer:tel"] || '400-888-8888'}}
+                            <!-- <p class="text-gray-600 text-sm md:text-base">400-888-8888</p> -->
+                            <!-- <p class="text-gray-600 text-sm md:text-base">400-888-8888<br>021-12345678</p> -->
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl md:rounded-2xl p-4 md:p-8 flex items-start space-x-3 md:space-x-4">
+                        <div class="w-10 h-10 md:w-14 md:h-14 bg-gold-light/20 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="mail" class="w-5 h-5 md:w-7 md:h-7 text-gold-light"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-base md:text-xl font-bold mb-1 md:mb-2">邮箱</h4>
+                            {{@ frag["email"] || 'info@hongdaoge.com<br>booking@hongdaoge.com'}}
+                            <!-- <p class="text-gray-600 text-sm md:text-base">info@hongdaoge.com<br>booking@hongdaoge.com</p> -->
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl md:rounded-2xl p-4 md:p-8 flex items-start space-x-3 md:space-x-4">
+                        <div class="w-10 h-10 md:w-14 md:h-14 bg-primary/20 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="clock" class="w-5 h-5 md:w-7 md:h-7 text-primary"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-base md:text-xl font-bold mb-1 md:mb-2">营业时间</h4>
+                            {{@ frag["worktime"] || '周一至周五: 9:00 - 21:00<br>周六周日: 8:00 - 18:00'}}
+                            <!-- <p class="text-gray-600 text-sm md:text-base">周一至周五: 9:00 - 21:00<br>周六周日: 8:00 - 18:00</p> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 md:mt-24 scroll-fade-in">
+            <h2 class="text-xl md:text-4xl font-bold mb-4 md:mb-8 text-center">关注我们</h2>
+            <div class="flex justify-center items-center gap-4 md:gap-8">
+                <a href="#" class="flex flex-col items-center group">
+                    <div class="w-10 h-10 md:w-16 md:h-16 bg-primary/20 rounded-full flex items-center justify-center group-hover:bg-primary transition-colors mb-2">
+                        <i data-lucide="message-circle" class="w-5 h-5 md:w-8 md:h-8 text-primary group-hover:text-ink-black"></i>
+                    </div>
+                    <span class="text-xs md:text-base font-medium">微信</span>
+                </a>
+                <a href="#" class="flex flex-col items-center group">
+                    <div class="w-10 h-10 md:w-16 md:h-16 bg-jade/20 rounded-full flex items-center justify-center group-hover:bg-jade transition-colors mb-2">
+                        <i data-lucide="video" class="w-5 h-5 md:w-8 md:h-8 text-jade group-hover:text-white"></i>
+                    </div>
+                    <span class="text-xs md:text-base font-medium">抖音</span>
+                </a>
+                <a href="#" class="flex flex-col items-center group">
+                    <div class="w-10 h-10 md:w-16 md:h-16 bg-gold-light/20 rounded-full flex items-center justify-center group-hover:bg-gold-light transition-colors mb-2">
+                        <i data-lucide="book-open" class="w-5 h-5 md:w-8 md:h-8 text-gold-light group-hover:text-ink-black"></i>
+                    </div>
+                    <span class="text-xs md:text-base font-medium">小红书</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {{include './common/float-contact.html'}}
+    {{include './common/footer.html'}}
+
+    <script src="{{static_url}}js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('contactForm');
+        var titleInput = document.getElementById('title');
+        var nameInput = document.getElementById('name');
+        var phoneInput = document.getElementById('phone');
+        var captchaInput = document.getElementById('captcha');
+        var captchaImg = document.getElementById('captchaImg');
+        var contentInput = document.getElementById('content');
+        var submitBtn = document.getElementById('submitBtn');
+        var loadingIcon = document.getElementById('loadingIcon');
+        var successModal = document.getElementById('successModal');
+        var isSubmitting = false;
+        var lastSubmitTime = 0;
+        var submitInterval = 10000;
+
+        function refreshCaptcha() {
+            captchaImg.src = '/api/captcha?t=' + Date.now();
+        }
+
+        captchaImg.addEventListener('click', refreshCaptcha);
+
+        var validators = {
+            title: function(value) {
+                if (!value || value.trim().length < 2 || value.trim().length > 50) {
+                    return '请输入2-50个字符的问题';
+                }
+                return null;
+            },
+            name: function(value) {
+                if (!value || value.trim().length < 2 || value.trim().length > 20) {
+                    return '请输入2-20个字符的姓名';
+                }
+                return null;
+            },
+            phone: function(value) {
+                var phoneRegex = /^1[3-9]\d{9}$/;
+                if (!value || !phoneRegex.test(value)) {
+                    return '请输入正确的11位手机号码';
+                }
+                return null;
+            },
+            captcha: function(value) {
+                if (!value || value.trim().length !== 4) {
+                    return '请输入4位验证码';
+                }
+                return null;
+            },
+            content: function(value) {
+                if (!value || value.trim().length < 5 || value.trim().length > 500) {
+                    return '请输入5-500个字符的留言';
+                }
+                return null;
+            }
+        };
+
+        function showError(field, message) {
+            var errorEl = document.getElementById(field + 'Error');
+            var inputEl = document.getElementById(field);
+            if (message) {
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+                inputEl.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500/20');
+                inputEl.classList.remove('border-gray-300', 'focus:border-primary', 'focus:ring-primary/20');
+            } else {
+                errorEl.classList.add('hidden');
+                inputEl.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500/20');
+                inputEl.classList.add('border-gray-300', 'focus:border-primary', 'focus:ring-primary/20');
+            }
+        }
+
+        titleInput.addEventListener('blur', function() {
+            var error = validators.title(titleInput.value);
+            showError('title', error);
+        });
+
+        nameInput.addEventListener('blur', function() {
+            var error = validators.name(nameInput.value);
+            showError('name', error);
+        });
+
+        phoneInput.addEventListener('blur', function() {
+            var error = validators.phone(phoneInput.value);
+            showError('phone', error);
+        });
+
+        captchaInput.addEventListener('blur', function() {
+            var error = validators.captcha(captchaInput.value);
+            showError('captcha', error);
+        });
+
+        contentInput.addEventListener('blur', function() {
+            var error = validators.content(contentInput.value);
+            showError('content', error);
+        });
+
+        [titleInput, nameInput, phoneInput, captchaInput, contentInput].forEach(function(input) {
+            input.addEventListener('input', function() {
+                showError(input.id, null);
+            });
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var currentTime = Date.now();
+
+            if (isSubmitting) {
+                alert('正在提交中，请勿重复点击');
+                return;
+            }
+
+            if (currentTime - lastSubmitTime < submitInterval) {
+                var remainingTime = Math.ceil((submitInterval - (currentTime - lastSubmitTime)) / 1000);
+                alert('提交过于频繁，请' + remainingTime + '秒后再试');
+                return;
+            }
+
+            var titleError = validators.title(titleInput.value);
+            var nameError = validators.name(nameInput.value);
+            var phoneError = validators.phone(phoneInput.value);
+            var captchaError = validators.captcha(captchaInput.value);
+            var contentError = validators.content(contentInput.value);
+
+            showError('title', titleError);
+            showError('name', nameError);
+            showError('phone', phoneError);
+            showError('captcha', captchaError);
+            showError('content', contentError);
+
+            if (titleError || nameError || phoneError || captchaError || contentError) {
+                return;
+            }
+
+            isSubmitting = true;
+            lastSubmitTime = currentTime;
+            submitBtn.disabled = true;
+            loadingIcon.classList.remove('hidden');
+
+            fetch('/cms/message/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: nameInput.value.trim(),
+                    tel: phoneInput.value.trim(),
+                    title: titleInput.value.trim(),
+                    content: contentInput.value.trim(),
+                    captcha: captchaInput.value.trim(),
+                    type: '1',
+                    timestamp: currentTime
+                })
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(result) {
+                if (result.code === 200 || result.success) {
+                    successModal.classList.remove('hidden');
+                    form.reset();
+                    refreshCaptcha();
+                } else {
+                    alert(result.msg || '提交失败，请稍后重试');
+                    refreshCaptcha();
+                }
+            })
+            .catch(function(error) {
+                console.error('提交失败:', error);
+                alert('网络错误，请检查网络连接后重试');
+                refreshCaptcha();
+            })
+            .finally(function() {
+                isSubmitting = false;
+                submitBtn.disabled = false;
+                loadingIcon.classList.add('hidden');
+            });
+        });
+
+        window.closeSuccessModal = function() {
+            successModal.classList.add('hidden');
+        };
+
+        successModal.addEventListener('click', function(e) {
+            if (e.target === successModal) {
+                closeSuccessModal();
+            }
+        });
+    });
+    </script>
+</body>
+</html>

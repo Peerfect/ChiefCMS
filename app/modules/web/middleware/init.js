@@ -1,34 +1,63 @@
-import { helper } from "chanjs";
+import { helper, cache } from "chanjs";
 const { tree } = helper;
 const { config } = Chan;
+const { template, APP_VERSION, CACHE, WEB_CACHE_KEY } = config;
 
 import home from "../service/home.js";
+
+config.data = config.data || {};
 
 export default () => {
   return async (req, res, next) => {
     try {
-     
-      let { env, appName, version, cache } = config;
-      // 每次请求都刷新数据，确保导航一致
-      // if ("nav" in req.app.locals && cache) {
-      //   await next();
-      //   return;
-      // }
-     
-      // 站点
+      // 缓存优化：直接读取，不重复查询
+      if (CACHE) {
+        const cachedData = cache.get(WEB_CACHE_KEY);
+        if (cachedData) {
+          return next();
+        }
+      }
+
+      let { appName, version } = config;
+
+      // 查询 cms_data 配置
+      const configData = await Chan.db("sys_config").where("type_code", "cms_data").select();
+
+      // cms_data 配置
+      configData.forEach(item => {
+        config.data[item.config_key] = item.config_value;
+      });
+
+      // 站点数据（site、category、friendlink、frag、tag）
       const { site, category, friendlink, frag, tag } = await home.init();
       const nav = tree(category);
-      Object.assign(req.app.locals, {
+
+      // 模板配置
+      const { domain = "", template: dbTemplate = "" } = site || {};
+      const finalTemplate = dbTemplate || template;
+      config.template = finalTemplate;
+      config.data.site = site || {};
+
+      const localsData = {
         appName,
         version,
+        template: finalTemplate,
+        domain: domain || "",
+        static_url: `/public/view/${finalTemplate}/`,
+        APP_VERSION,
         site,
         nav,
         category,
         friendlink,
         frag,
         tag,
-      });
-      
+      };
+
+      Object.assign(req.app.locals, localsData);
+
+      // 写入缓存
+      CACHE && cache.set(WEB_CACHE_KEY, localsData);
+
       await next();
     } catch (error) {
       next(error);

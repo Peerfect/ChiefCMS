@@ -9,7 +9,9 @@ class CategoryService extends Service {
 
   // 增
   async create(body) {
-    const res = await this.insert(body);
+    const data = { ...body };
+   
+    const res = await this.insert(data);
     return res;
   }
 
@@ -54,6 +56,7 @@ class CategoryService extends Service {
         "mid",
         "listView",
         "articleView",
+        "dataConfig",
       ])
       .first();
     return data;

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{tag || path}} - {{site.name}}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="{{static_url}}css/fonts.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#C9A063',
+                        'primary-dark': '#8B6F47',
+                        secondary: '#2D5F5D',
+                        'ink-black': '#1A1A1A',
+                        'ink-gray': '#2C2C2C',
+                        'gold-light': '#E6C896',
+                        'jade': '#7FA99B',
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif SC', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{static_url}}css/common.css">
+</head>
+<body>
+    {{include './common/header.html'}}
+
+    <div class="container-1440 py-16 md:py-24 px-4 md:px-12">
+        <div class="mb-12">
+            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                <a href="/" class="hover:text-primary transition-colors">首页</a>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                <span class="text-primary font-medium">标签：<span class="font-bold">{{tag || path}}</span></span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div class="lg:col-span-3">
+                <div class="flex items-center justify-between mb-8">
+                    <h1 class="text-3xl font-bold font-serif text-ink-black">
+                        <span class="text-primary">标签：</span>{{tag || path}}
+                    </h1>
+                    <span class="text-gray-500">共找到 <span class="text-primary font-bold">{{tags.list.length}}</span> 篇文章</span>
+                </div>
+
+                {{if tags.list.length > 0}}
+                <div class="space-y-8">
+                    {{each tags.list}}
+                    <div class="glass-card rounded-2xl overflow-hidden">
+                        <div class="flex flex-col md:flex-row">
+                            {{if $value.img}}
+                            <div class="md:w-2/5 flex-shrink-0">
+                                <img src="{{$value.img}}" alt="{{$value.title}}" class="w-full h-48 md:h-64 object-cover">
+                            </div>
+                            {{/if}}
+                            <div class="p-6 flex-1 {{if !$value.img}}md:w-full{{/if}}">
+                                <div class="flex items-center space-x-2 mb-3">
+                                    {{if $value.tags && $value.tags.length > 0}}
+                                        {{each $value.tags}}
+                                        <a href="/tags/{{$value.name}}.html" class="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full hover:bg-primary hover:text-white transition-all duration-300">
+                                            {{$value.name}}
+                                        </a>
+                                        {{/each}}
+                                    {{else}}
+                                    <span class="px-3 py-1 bg-primary/20 text-primary text-xs rounded-full">{{$value.name}}</span>
+                                    {{/if}}
+                                    <span class="text-gray-500 text-sm">{{ dateFormat($value.createdAt, 'MM') }}月{{ dateFormat($value.createdAt, 'DD') }}日</span>
+                                </div>
+                                
+                                <h2 class="text-xl md:text-2xl font-bold mb-3 hover:text-primary transition-colors cursor-pointer">
+                                    <a href="{{$value.path}}/article-{{$value.id}}.html">{{$value.title}}</a>
+                                </h2>
+                                <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{$value.description}}</p>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                        <span class="flex items-center">
+                                            <i data-lucide="user" class="w-4 h-4 mr-1"></i>
+                                            {{$value.author || 'admin'}}
+                                        </span>
+                                        <span class="flex items-center">
+                                            <i data-lucide="eye" class="w-4 h-4 mr-1"></i>
+                                            {{$value.pv}}
+                                        </span>
+                                    </div>
+                                    <a href="{{$value.path}}/article-{{$value.id}}.html" class="inline-flex items-center text-sm md:text-base text-primary hover:text-gold-light transition-colors">
+                                        阅读全文 <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+                {{else}}
+                <div class="text-center py-16">
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                        <i data-lucide="book-open" class="w-10 h-10 text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">暂无相关文章</h3>
+                    <p class="text-gray-500 mb-6">该标签下暂时没有文章，去看看其他内容吧～</p>
+                    <a href="/" class="btn-primary inline-flex items-center">
+                        <i data-lucide="home" class="w-4 h-4 mr-2"></i>
+                        返回首页
+                    </a>
+                </div>
+                {{/if}}
+
+                {{if pageHtml}}
+                <div class="mt-12 flex justify-center">
+                    <div class="glass-card rounded-xl px-6 py-4">
+                        <ul class="flex items-center space-x-2" id="page">
+                            {{@ pageHtml}}
+                        </ul>
+                    </div>
+                </div>
+                {{/if}}
+            </div>
+
+            <aside class="lg:col-span-1">
+                <div class="glass-card rounded-2xl p-6 sticky top-24">
+                    <h3 class="text-lg font-bold mb-6 flex items-center text-ink-black">
+                        <i data-lucide="tag" class="w-5 h-5 mr-2 text-primary"></i>
+                        所有标签
+                    </h3>
+                    {{if tag && tag.length > 0}}
+                    <div class="flex flex-wrap gap-2">
+                        {{each tag}}
+                        <a href="/tags/{{$value.path}}/tag.html?tag={{$value.name}}" class="px-3 py-1.5 bg-primary/10 text-primary text-sm rounded-full hover:bg-primary hover:text-white transition-all duration-300">
+                            {{$value.name}}
+                        </a>
+                        {{/each}}
+                    </div>
+                    {{else}}
+                    <p class="text-gray-500 text-sm">暂无标签</p>
+                    {{/if}}
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    {{include './common/footer.html'}}
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

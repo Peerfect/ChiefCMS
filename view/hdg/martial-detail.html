@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{article.title}} - {{site.name || '弘道阁'}}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="{{static_url}}css/fonts.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#C9A063',
+                        'primary-dark': '#8B6F47',
+                        secondary: '#2D5F5D',
+                        'ink-black': '#1A1A1A',
+                        'ink-gray': '#2C2C2C',
+                        'gold-light': '#E6C896',
+                        'jade': '#7FA99B',
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif SC', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{static_url}}css/common.css">
+</head>
+<body>
+    {{include './common/header.html'}}
+
+    <div class="page-header">
+        <img src="{{static_url}}img/news-bg.jpg" alt="新闻资讯">
+        <div class="overlay"></div>
+        <div class="container-1440">
+            <h1 class="text-primary">新闻资讯</h1>
+        </div>
+    </div>
+
+    <div class="container-1440 py-16 md:py-24 px-4 md:px-12">
+        <div class="max-w-4xl mx-auto">
+            {{if article}}
+            <article class="glass-card rounded-2xl p-8 md:p-12">
+                <div class="mb-8">
+                    <div class="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+                        <span class="flex items-center"><i data-lucide="calendar" class="w-4 h-4 mr-1"></i> {{article.createdAt}}</span>
+                        <span class="flex items-center"><i data-lucide="eye" class="w-4 h-4 mr-1"></i> {{article.views || 0}}</span>
+                    </div>
+                    <h1 class="text-2xl md:text-4xl font-bold mb-4">{{article.title}}</h1>
+                    {{if article.category}}
+                    <span class="px-3 py-1 bg-primary/20 text-primary text-sm rounded-full">{{article.category.name}}</span>
+                    {{/if}}
+                </div>
+                
+                {{if article.cover}}
+                <img src="{{article.cover}}" alt="{{article.title}}" class="w-full h-64 md:h-96 object-cover rounded-xl mb-8">
+                {{/if}}
+                
+                <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                    {{@article.content}}
+                </div>
+                
+                {{if article.tags && article.tags.length > 0}}
+                <div class="mt-8 pt-8 border-t border-gray-200">
+                    <div class="flex items-center flex-wrap gap-2">
+                        <span class="text-gray-500 text-sm">标签：</span>
+                        {{each article.tags}}
+                        <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">{{$value}}</span>
+                        {{/each}}
+                    </div>
+                </div>
+                {{/if}}
+            </article>
+            {{else}}
+            <div class="text-center py-16">
+                <p class="text-gray-500">文章不存在或已被删除</p>
+            </div>
+            {{/if}}
+            
+            <div class="mt-8 flex items-center justify-between">
+                <a href="/news.html" class="btn-primary inline-flex items-center">
+                    <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> 返回列表
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {{include './common/float-contact.html'}}
+    {{include './common/footer.html'}}
+
+    <script src="{{static_url}}js/common.js"></script>
+</body>
+</html>

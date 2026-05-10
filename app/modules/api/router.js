@@ -24,4 +24,5 @@ export default async (app, router, config) => {
   router.get("/getTagsById", controller.Api.getTagsById);
   router.get("/search", controller.Api.search);
   router.get("/pvadd", controller.Api.pvadd);
+  router.get("/captcha", controller.Api.captcha);
 };

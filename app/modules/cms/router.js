@@ -1,12 +1,10 @@
 import auth from "../../middleware/auth.js";
-import init from "../../middleware/init.js";
+import captcha from "./middleware/captcha.js";
 import { helper } from "chanjs";
 import { singleUpload, multiUpload, logo } from "../../common/upload.js";
 
 export default async (app, router, config) => {
   let controller = await helper.loadController("cms");
-  
-  router.use(init());
 
   // 站点信息
   router.get("/site/info", auth(), controller.Site.info);
@@ -84,9 +82,10 @@ export default async (app, router, config) => {
   router.get("/message/list", auth(), controller.message.list); // 添加认证保护
   router.get("/message/search", auth(), controller.message.search); // 添加认证保护
   router.get("/message/detail", auth(), controller.message.detail); // 添加认证保护
-  router.post("/message/create", controller.message.create);
+  router.post("/message/create", auth(), controller.message.create); // 添加验证码保护
   router.get("/message/delete", auth(), controller.message.delete);
   router.post("/message/update", auth(), controller.message.update);
+  router.post("/message/add", captcha(), controller.message.create); // 前台留言加验证码
 
   // 轮播管理
   router.get("/slide/list", controller.slide.list);

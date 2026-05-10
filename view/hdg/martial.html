@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>武术探究 - {{site.name || '弘道阁'}}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="{{static_url}}css/fonts.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#C9A063',
+                        'primary-dark': '#8B6F47',
+                        secondary: '#2D5F5D',
+                        'ink-black': '#1A1A1A',
+                        'ink-gray': '#2C2C2C',
+                        'gold-light': '#E6C896',
+                        'jade': '#7FA99B',
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif SC', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{static_url}}css/common.css">
+    <style>
+        .video-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .video-card:hover .play-btn {
+            transform: scale(1.1);
+        }
+        .play-btn {
+            transition: transform 0.3s ease;
+        }
+   
+        
+    </style>
+</head>
+<body>
+    {{include './common/header.html'}}
+
+    <div class="page-header">
+        <img src="{{static_url}}img/training-bg.jpg" alt="{{cate.name}}">
+        <div class="overlay"></div>
+        <div class="container-1440">
+            <h1 class="text-primary">{{cate.name}}</h1>
+        </div>
+    </div>
+
+    <div class="container-1440 py-16 md:py-24 px-4 md:px-12">
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold mb-4">弘道阁・功夫雅集</h2>
+            <p class="text-gray-600">汇聚武术文化、闲暇片刻，尽览传统武学之韵，随时随地感受传统功夫魅力。</p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-8 mb-12">
+            {{each articleList?.list || []}}
+            <a href="{{$value.path}}/article-{{$value.id}}.html" class="video-card glass-card rounded-2xl overflow-hidden group cursor-pointer scroll-fade-in block">
+                <div class="relative overflow-hidden">
+                    <img src="{{$value.img || static_url+'img/training-1.jpg'}}" alt="{{$value.title}}" class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-700">
+                    <!-- <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <div class="play-btn w-16 h-16 bg-primary/90 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="play" class="w-8 h-8 text-white ml-1"></i>
+                        </div>
+                    </div> -->
+                    <span class="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded">{{ dateFormat($value.createdAt,'YYYY-MM-DD') }}</span>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center space-x-2 mb-3">
+                        {{if $value.tags && $value.tags.length > 0}}
+                        <span class="px-3 py-1 bg-primary/20 text-primary text-xs rounded-full">{{$value.tags[0].name}}</span>
+                        {{/if}}
+                        <span class="text-gray-500 text-sm">{{$value.name}}</span>
+                    </div>
+                    <h3 class="text-base font-bold mb-2 group-hover:text-primary transition-colors">{{$value.title}}</h3>
+                    <p class="text-gray-600 text-sm line-clamp-2">{{$value.description}}</p>
+                    <div class="flex items-center justify-between mt-4 text-sm text-gray-500">
+                        <span class="flex items-center"><i data-lucide="eye" class="w-4 h-4 mr-1"></i> {{$value.pv || 0}}</span>
+                        <!-- <span class="flex items-center"><i data-lucide="heart" class="w-4 h-4 mr-1"></i> {{$value.like || 0}}</span> -->
+                    </div>
+                </div>
+            </a>
+            {{/each}}
+        </div>
+
+        <div class="flex items-center justify-center page">
+            {{@ pageHtml}}
+        </div>
+    </div>
+    {{include './common/footer.html'}}
+
+    <script src="{{static_url}}js/common.js"></script>
+</body>
+</html>

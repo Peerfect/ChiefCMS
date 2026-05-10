@@ -1,8 +1,10 @@
-import { Controller, helper, common } from "chanjs";
+import { Controller, helper, common, cache, config } from "chanjs";
 import frag from "../service/frag.js";
+import { clearWebCache } from "../../../common/cacheclear.js";
 
 const { success } = common;
 const { formatDateFields } = helper;
+const { WEB_CACHE_KEY } = config;
 
 class FragController extends Controller {
   constructor() {
@@ -13,7 +15,8 @@ class FragController extends Controller {
     try {
       const body = req.body;
       const data = await frag.create(body);
-     res.json(this.success(data));
+      clearWebCache(req);
+      res.json(this.success(data));
     } catch (err) {
       next(err);
     }
@@ -24,7 +27,8 @@ class FragController extends Controller {
     try {
       const { id } = req.query;
       const data = await frag.delete(id);
-     res.json(this.success(data));
+      clearWebCache(req);
+      res.json(this.success(data));
     } catch (err) {
       next(err);
     }
@@ -35,7 +39,8 @@ class FragController extends Controller {
     try {
       const body = req.body;
       const data = await frag.update(body);
-     res.json(this.success(data));
+      clearWebCache(req);
+      res.json(this.success(data));
     } catch (err) {
       next(err);
     }

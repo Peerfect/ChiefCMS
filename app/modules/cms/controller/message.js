@@ -13,11 +13,13 @@ class MessageController extends Controller {
     try {
       const body = req.body;
       const data = await message.create(body);
-     res.json(this.success(data));
+      res.json(this.success(data));
     } catch (err) {
       next(err);
     }
   }
+
+
 
   // 删除
   async delete(req, res, next) {

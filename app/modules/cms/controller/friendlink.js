@@ -1,8 +1,10 @@
-import { Controller, helper, common } from "chanjs";
+import { Controller, helper, common, cache, config } from "chanjs";
 import friendlink from "../service/friendlink.js";
+import { clearWebCache } from "../../../common/cacheclear.js";
 
 const { success } = common;
 const { formatDateFields } = helper;
+const { WEB_CACHE_KEY } = config;
 
 class FriendlinkController extends Controller {
   constructor() {
@@ -14,7 +16,8 @@ class FriendlinkController extends Controller {
       let body = req.body;
       body = formatDateFields(body);
       const data = await friendlink.create(body);
-     res.json(this.success(data));
+      clearWebCache(req);
+      res.json(this.success(data));
     } catch (err) {
       next(err);
     }
@@ -25,7 +28,8 @@ class FriendlinkController extends Controller {
     try {
       const { id } = req.query;
       const data = await friendlink.delete(id);
-     res.json(this.success(data));
+      clearWebCache(req);
+      res.json(this.success(data));
     } catch (err) {
       next(err);
     }
@@ -36,7 +40,8 @@ class FriendlinkController extends Controller {
     try {
       const body = req.body;
       const data = await friendlink.update(body);
-     res.json(this.success(data));
+      clearWebCache(req);
+      res.json(this.success(data));
     } catch (err) {
       next(err);
     }

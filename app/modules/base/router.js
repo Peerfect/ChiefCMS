@@ -1,5 +1,5 @@
 import auth  from "../../middleware/auth.js";
-import init from "../../middleware/init.js";
+import init from "./middleware/init.js";
 import { helper } from "chanjs";
 import { singleUpload, multiUpload, logo } from "../../common/upload.js";
 

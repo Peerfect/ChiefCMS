@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{category?.seoTitle || category?.name || '学员天地'}} - {{site.name || '弘道阁'}}</title>
+    <meta name="keywords" content="{{category?.seoKeywords}}">
+    <meta name="description" content="{{category?.seoDescription}}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="{{static_url}}css/fonts.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#C9A063',
+                        'primary-dark': '#8B6F47',
+                        secondary: '#2D5F5D',
+                        'ink-black': '#1A1A1A',
+                        'ink-gray': '#2C2C2C',
+                        'gold-light': '#E6C896',
+                        'jade': '#7FA99B',
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif SC', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{static_url}}css/common.css">
+</head>
+<body>
+    {{include './common/header.html'}}
+
+    <div class="page-header">
+        <img src="{{static_url}}img/hero-mountain.jpg" alt="{{category?.name || '学员天地'}}">
+        <div class="overlay"></div>
+        <div class="container-1440">
+            <h1 class="text-jade">{{category?.name || '学员天地'}}</h1>
+        </div>
+    </div>
+
+    <div class="container-1440 py-16 md:py-24 px-4 md:px-12">
+        <div class="text-center mb-16 scroll-fade-in">
+            <h2 class="section-title mb-4">学员成长故事</h2>
+            <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                {{category?.description || '每一位学员都是弘道阁大家庭的一员，分享他们的学习心得与成长感悟'}}
+            </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-8 mb-24">
+            {{each articleList?.list || []}}
+            <div class="testimonial-card rounded-2xl p-8 scroll-fade-in">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+                        <img src="{{$value.img || static_url}}img/avatar-1.jpg" alt="{{$value.title}}" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold">{{$value.title}}</h4>
+                        {{if $value.tags && $value.tags.length > 0}}
+                        <p class="text-gray-600 text-sm">{{$value.tags[0].name}}</p>
+                        {{/if}}
+                    </div>
+                </div>
+                <p class="text-gray-600 leading-relaxed mb-4">
+                    "{{$value.description}}"
+                </p>
+                <div class="flex items-center text-primary">
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+
+        <div class="scroll-fade-in mb-24">
+            <h2 class="text-4xl font-bold mb-12 text-center">学员风采</h2>
+            <div class="grid grid-cols-4 gap-4">
+                <div class="relative group overflow-hidden rounded-xl">
+                    <img src="{{static_url}}img/hero-taiji.jpg" alt="学员风采" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <p class="text-white font-bold">晨练太极</p>
+                    </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl">
+                    <img src="{{static_url}}img/travel-wudang.jpg" alt="学员风采" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <p class="text-white font-bold">武当游学</p>
+                    </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl">
+                    <img src="{{static_url}}img/culture-bg.jpg" alt="学员风采" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <p class="text-white font-bold">课堂学习</p>
+                    </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl">
+                    <img src="{{static_url}}img/travel-shaolin.jpg" alt="学员风采" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <p class="text-white font-bold">少林体验</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-fade-in">
+            <h2 class="text-4xl font-bold mb-12 text-center">学员成就</h2>
+            <div class="grid grid-cols-4 gap-8">
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="text-5xl font-black text-primary mb-4">5000+</div>
+                    <p class="text-gray-600">累计服务学员</p>
+                </div>
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="text-5xl font-black text-jade mb-4">98%</div>
+                    <p class="text-gray-600">学员满意度</p>
+                </div>
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="text-5xl font-black text-gold-light mb-4">85%</div>
+                    <p class="text-gray-600">续费率</p>
+                </div>
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="text-5xl font-black text-primary mb-4">200+</div>
+                    <p class="text-gray-600">学员推荐人数</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{include './common/float-contact.html'}}
+    {{include './common/footer.html'}}
+
+    <script src="{{static_url}}js/common.js"></script>
+</body>
+</html>

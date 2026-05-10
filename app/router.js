@@ -4,6 +4,8 @@ const { getIp } = helper;
 const routers = (app, router, config) => {
   const { template = "default" } = config;
 
+  
+
   //404处理
   router.use((req, res, next) => {
     console.error(

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{site.title}}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="{{static_url}}css/fonts.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#C9A063',
+                        'primary-dark': '#8B6F47',
+                        secondary: '#2D5F5D',
+                        'ink-black': '#1A1A1A',
+                        'ink-gray': '#2C2C2C',
+                        'gold-light': '#E6C896',
+                        'jade': '#7FA99B',
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif SC', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{static_url}}css/common.css">
+    <style>
+        .carousel-slide {
+            display: none;
+            animation: fadeIn 1s ease-in-out;
+        }
+        .carousel-slide.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    {{include './common/header.html'}}
+
+    <div class="relative h-[60vh] overflow-hidden">
+        <div id="carousel" class="relative h-full">
+            {{if banner && banner.length>0}}
+            {{each banner}}
+            <div class="carousel-slide {{$index===0?'active':''}} absolute inset-0">
+                <img src="{{$value.imgUrl}}" alt="{{$value.title}}" class="w-full h-full object-cover">
+                <div class="hero-overlay absolute inset-0"></div>
+                <div class="container-1440 absolute inset-0 flex items-center {{$index===1?'justify-end':''}} px-4 md:px-12">
+                    {{@ $value.content}}
+                </div>
+            </div>
+            {{/each}}
+            {{/if}}
+        </div>
+        <button onclick="prevSlide()" class="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 w-10 h-10 md:w-14 md:h-14 bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center transition-all z-20 group">
+            <i data-lucide="chevron-left" class="w-6 h-6 md:w-8 md:h-8 text-white group-hover:text-primary transition-colors"></i>
+        </button>
+        <button onclick="nextSlide()" class="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 w-10 h-10 md:w-14 md:h-14 bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center transition-all z-20 group">
+            <i data-lucide="chevron-right" class="w-6 h-6 md:w-8 md:h-8 text-white group-hover:text-primary transition-colors"></i>
+        </button>
+        <div class="absolute bottom-6 md:bottom-12 left-1/2 transform -translate-x-1/2 flex space-x-2 md:space-x-3 z-10">
+            {{if banner && banner.length>0}}
+            {{each banner}}
+            <button class="carousel-dot w-2.5 h-2.5 md:w-3 md:h-3 rounded-full {{$index===0?'bg-primary':'bg-gray-500'}} transition-all" onclick="goToSlide({{$index}})"></button>
+            {{/each}}
+            {{/if}}
+        </div>
+    </div>
+
+    <div class="container-1440 py-16 md:py-24 px-4 md:px-12 pattern-bg">
+        <h2 class="section-title text-center mb-3 md:mb-4">核心业务</h2>
+        <p class="text-center text-gray-600 text-base md:text-lg mb-8 md:mb-16">三大支柱·成就身心修养</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+            <div class="glass-card rounded-2xl md:rounded-3xl p-6 md:p-10 text-center cursor-pointer group">
+                <div class="feature-icon w-16 h-16 md:w-20 md:h-20 mb-4">
+                    <i data-lucide="activity" class="w-8 h-8 md:w-10 md:h-10 text-primary"></i>
+                </div>
+                <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 group-hover:text-primary transition-colors">功法培训</h3>
+                {{@ frag['home:hxyw:gfpx']}}
+                <!-- <p class="text-gray-600 text-sm md:text-base leading-relaxed mb-4 md:mb-6">
+                    八段锦、太极拳、形意拳等传统功法<br>
+                    名师指导，科学化教学，个性化方案
+                </p>
+                <a href="/training/index.html" class="inline-flex items-center text-sm md:text-base text-primary hover:text-gold-light transition-colors">
+                    了解更多 <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </a> -->
+            </div>
+            <div class="glass-card rounded-2xl md:rounded-3xl p-6 md:p-10 text-center cursor-pointer group">
+                <div class="feature-icon w-16 h-16 md:w-20 md:h-20 mb-4">
+                    <i data-lucide="map" class="w-8 h-8 md:w-10 md:h-10 text-jade"></i>
+                </div>
+                <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 group-hover:text-jade transition-colors">游学文旅</h3>
+                {{@ frag['home:hxyw:yxwl']}}
+                <!-- <p class="text-gray-600 text-sm md:text-base leading-relaxed mb-4 md:mb-6">
+                    道家圣地、国学研修、中医养生体验<br>
+                    名师随行，深度互动，小团精品
+                </p>
+                <a href="/travel/index.html" class="inline-flex items-center text-sm md:text-base text-jade hover:text-primary transition-colors">
+                    探索线路 <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </a> -->
+            </div>
+            <div class="glass-card rounded-2xl md:rounded-3xl p-6 md:p-10 text-center cursor-pointer group">
+                <div class="feature-icon w-16 h-16 md:w-20 md:h-20 mb-4">
+                    <i data-lucide="book-open" class="w-8 h-8 md:w-10 md:h-10 text-gold-light"></i>
+                </div>
+                <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 group-hover:text-gold-light transition-colors">国学课堂</h3>
+                 {{@ frag['home:hxyw:gxkt']}}
+                <!-- <p class="text-gray-600 text-sm md:text-base leading-relaxed mb-4 md:mb-6">
+                    道德经、易经、论语精讲<br>
+                    中医基础、古典智慧现代应用
+                </p>
+                <a href="/culture/index.html" class="inline-flex items-center text-sm md:text-base text-gold-light hover:text-primary transition-colors">
+                    进入课堂 <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </a> -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container-1440 py-16 md:py-24 px-4 md:px-12" style="background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);">
+        <div class="flex items-end justify-between mb-12">
+            <div>
+                <h2 class="section-title mb-2">近期活动</h2>
+                <p class="text-gray-600 text-lg">精彩课程与游学即将开启</p>
+            </div>
+            <a href="{{hd.nav.path}}/index.html" class="text-primary hover:text-gold-light transition-colors inline-flex items-center">
+                查看全部活动 <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
+            </a>
+        </div>
+        <div class="grid grid-cols-3 gap-8">
+            {{each hd.list}}
+            <div class="glass-card rounded-2xl overflow-hidden">
+                {{if $value.img}}
+                <img src="{{$value.img}}" alt="{{$value.title}}" class="w-full h-56 object-cover">
+                {{else}}
+                <img src="{{static_url}}img/event-{{$index + 1}}.jpg" alt="{{$value.title}}" class="w-full h-56 object-cover">
+                {{/if}}
+                <div class="p-6">
+
+                    <div class="flex items-center space-x-2 mb-3">
+                        {{if $value.tags && $value.tags.length > 0}}
+                            {{each $value.tags}}
+                            <a href="/tags/{{$value.name}}/tag.html" class="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full hover:bg-primary hover:text-white transition-all duration-300">
+                                {{$value.name}}
+                            </a>
+                            {{/each}}
+                        {{else}}
+                        <span class="px-3 py-1 bg-primary/20 text-primary text-xs rounded-full">{{$value.name}}</span>
+                        {{/if}}
+                        <span class="text-gray-500 text-sm">{{ dateFormat($value.createdAt, 'MM') }}月{{ dateFormat($value.createdAt, 'DD') }}日</span>
+                    </div>
+                    
+                    <h4 class="text-xl font-bold mb-2 hover:text-primary transition-colors cursor-pointer">{{$value.title}}</h4>
+                    <p class="text-gray-600 text-sm mb-4">{{$value.description}}</p>
+                    <a href="{{$value.path}}/article-{{$value.id}}.html" class="inline-flex items-center text-sm md:text-base text-primary hover:text-gold-light transition-colors">
+                        了解更多 <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                    </a>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+
+    <div class="container-1440 py-16 md:py-24 px-4 md:px-12">
+        <h2 class="section-title text-center mb-4">{{heard.nav.name}}</h2>
+        <p class="text-center text-gray-600 text-lg mb-16">真实体验·由心而发</p>
+        <div class="grid grid-cols-2 gap-8">
+            {{each heard.list}}
+            <div class="testimonial-card rounded-2xl p-8">
+                <div class="flex items-center space-x-4 mb-6">
+                    {{if $value.img}}
+                    <img src="{{$value.img}}" alt="{{$value.title}}" class="w-16 h-16 rounded-full object-cover">
+                    {{else}}
+                    <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                        <i data-lucide="user" class="w-8 h-8 text-primary"></i>
+                    </div>
+                    {{/if}}
+                    <div>
+                        <h4 class="text-xl font-bold">{{$value.title}}</h4>
+                        <p class="text-gray-600 text-sm">{{$value.studyStyle}}</p>
+                    </div>
+                </div>
+                <p class="text-gray-700 leading-relaxed">
+                    {{$value.description}}
+                </p>
+                <div class="flex items-center mt-4 text-primary">
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+
+    {{include './common/float-contact.html'}}
+    {{include './common/footer.html'}}
+
+    
+
+    <script src="{{static_url}}js/common.js"></script>
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        const dots = document.querySelectorAll('.carousel-dot');
+
+        function goToSlide(index) {
+            slides[currentSlide].classList.remove('active');
+            dots[currentSlide].classList.remove('bg-primary');
+            dots[currentSlide].classList.add('bg-gray-500');
+            
+            currentSlide = index;
+            
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.remove('bg-gray-500');
+            dots[currentSlide].classList.add('bg-primary');
+        }
+
+        function nextSlide() {
+            const next = (currentSlide + 1) % slides.length;
+            goToSlide(next);
+        }
+
+        function prevSlide() {
+            const prev = (currentSlide - 1 + slides.length) % slides.length;
+            goToSlide(prev);
+        }
+
+        setInterval(nextSlide, 5000);
+    </script>
+</body>
+</html>

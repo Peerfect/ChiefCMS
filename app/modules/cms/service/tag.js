@@ -13,7 +13,10 @@ class TagService extends Service {
 
   async has(path) {
     const res = await this.findOne({ query: { path } });
-    return Object.keys(res?.data||{}).length > 0;
+    if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+      return true;
+    }
+    return false;
   }
 
   // 删除tag ,需要删除cms_articleTag.js 里面的tid

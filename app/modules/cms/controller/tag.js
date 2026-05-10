@@ -1,7 +1,9 @@
-import { Controller, common } from "chanjs";
+import { Controller, common, cache, config } from "chanjs";
 import tag from "../service/tag.js";
+import { clearWebCache } from "../../../common/cacheclear.js";
 
 const { success, fail } = common;
+const { WEB_CACHE_KEY } = config;
 
 class TagController extends Controller {
   // 增
@@ -9,7 +11,8 @@ class TagController extends Controller {
     try {
       const body = req.body;
       const data = await tag.create(body);
-     res.json(this.success(data));
+      clearWebCache(req);
+      res.json(this.success(data));
     } catch (err) {
       next(err);
     }
@@ -20,7 +23,8 @@ class TagController extends Controller {
     try {
       const { id } = req.query;
       const data = await tag.delete(id);
-     res.json(this.success(data));
+      clearWebCache(req);
+      res.json(this.success(data));
     } catch (err) {
       next(err);
     }
@@ -31,7 +35,8 @@ class TagController extends Controller {
     try {
       const body = req.body;
       const data = await tag.update(body);
-     res.json(this.success(data));
+      clearWebCache(req);
+      res.json(this.success(data));
     } catch (err) {
       next(err);
     }
@@ -65,8 +70,12 @@ class TagController extends Controller {
   async has(req, res, next) {
     try {
       const { path } = req.query;
-      const data = await tag.has(path);
-     res.json(this.success(data));
+      const exists = await tag.has(path);
+      if (exists) {
+        res.json({ success: true, code: 200, msg: '标签已存在', data: true });
+      } else {
+        res.json({ success: true, code: 200, msg: '标签不存在', data: false });
+      }
     } catch (err) {
       next(err);
     }

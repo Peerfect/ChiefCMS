@@ -54,19 +54,22 @@ export const listDataParse = ({ cid, category, cate, page, data }) => {
   position = filterFields(position, positionField);
 
   //文章数量
-  const count = data.articleList.count;
-
+  const count = data?.articleList?.total || 0;
+console.log('文章数量', count);
+console.log('position', data);
   // 分页
   let pageHtml = "";
-  if (position.length > 0) {
+  if (position.length > 0 && count > 0) {
     const lastPath = position[position.length - 1].path; // 提前存储最后一个元素的路径
     const href = `${lastPath}/index`;
     pageHtml = pages(
       page,
       count,
-      data?.list?.articleList?.params?.pageSize || 10,
+      data?.articleList?.pageSize || 10,
       href
     );
+
+    console.log('pageHtml', pageHtml);
   }
 
   // 查找子栏目（包括当前栏目和所有子栏目）
@@ -94,15 +97,6 @@ export const articleGetParams = (req) => {
 
 export const articleDataParse = ({ article, cid, category }) => {
   article.content = htmlDecode(article.content);
-  // 扩展字段
-  Object.getOwnPropertyNames(article.field).forEach(function (key) {
-    if (
-      typeof article.field[key] == "string" &&
-      article.field[key].includes("{")
-    ) {
-      article.field[key] = JSON.parse(article.field[key]);
-    }
-  });
   // 当前栏目和当前栏目下所有子导航
   const navSub = getChildrenId(cid, category);
   let cate = navSub?.cate || {};

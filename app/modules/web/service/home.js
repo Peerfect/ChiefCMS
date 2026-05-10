@@ -23,9 +23,33 @@ const home = {
     return resultObject;
   },
 
+  // 从栏目列表中获取指定栏目的 dataConfig
+  _getCategoryConfig(categoryList, cid) {
+    if (!categoryList || !Array.isArray(categoryList)) return null;
+    
+    const category = typeof cid === 'string' 
+      ? categoryList.find(item => item.pinyin === cid)
+      : categoryList.find(item => item.id === cid);
+      
+    if (!category || !category.dataConfig) return null;
+    
+    const dataConfig = typeof category.dataConfig === 'string' 
+      ? JSON.parse(category.dataConfig) 
+      : category.dataConfig;
+    
+    return dataConfig;
+  },
+
   // 首页
-  async home() {
-    const config = Chan.config.data.home;
+  async home(categoryList) {
+    let config = Chan.config.data.home;
+    
+    // 从首页栏目（pinyin=home）获取配置
+    const categoryConfig = this._getCategoryConfig(categoryList, 'home');
+    if (categoryConfig && Object.keys(categoryConfig).length > 0) {
+      config = categoryConfig;
+    }
+    
     const apiCalls = getApiCalls(config, {}, common);
 
     // 使用Promise.all并行执行所有api调用，并通过解构赋值获取结果
@@ -42,8 +66,15 @@ const home = {
   },
 
   // 列表页
-  async list({ cid, page = 1 }) {
-    const config = Chan.config.data.list;
+  async list({ cid, page = 1, categoryList }) {
+    let config = Chan.config.data.list;
+    
+    // 从栏目获取配置
+    const categoryConfig = this._getCategoryConfig(categoryList, cid);
+    if (categoryConfig && Object.keys(categoryConfig).length > 0) {
+      config = categoryConfig;
+    }
+    
     const apiCalls = getApiCalls(
       config,
       {
@@ -67,8 +98,15 @@ const home = {
   },
 
   // 文章页
-  async article({ id, cid }) {
-    const config = Chan.config.data.article;
+  async article({ id, cid, categoryList }) {
+    let config = Chan.config.data.article;
+    
+    // 从栏目获取配置
+    const categoryConfig = this._getCategoryConfig(categoryList, cid);
+    if (categoryConfig && Object.keys(categoryConfig).length > 0) {
+      config = categoryConfig;
+    }
+    
     const apiCalls = getApiCalls(
       config,
       {
@@ -92,8 +130,14 @@ const home = {
   },
 
   // 单页列表页
-  async page({ cid }) {
-    const config = Chan.config.data.page;
+  async page({ cid, categoryList }) {
+    let config = Chan.config.data.page;
+    
+    // 从栏目获取配置
+    const categoryConfig = this._getCategoryConfig(categoryList, cid);
+    if (categoryConfig && Object.keys(categoryConfig).length > 0) {
+      config = categoryConfig;
+    }
 
     const apiCalls = getApiCalls(
       config,

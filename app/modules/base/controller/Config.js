@@ -65,6 +65,12 @@ class ConfigController extends Controller {
     try {
       const params = req.body;
       const data = await Config.update(params);
+      
+      // 清理上传配置缓存
+      if (params.type_code === "upload_config") {
+        Chan.config.upload = {};
+      }
+      
       res.json(this.success(data));
     } catch (err) {
       next(err);
@@ -76,6 +82,7 @@ class ConfigController extends Controller {
     try {
       const params = req.body;
       const data = await Config.updateMany(params);
+    
       res.json(this.success(data));
     } catch (err) {
       next(err);

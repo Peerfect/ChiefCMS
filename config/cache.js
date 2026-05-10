@@ -1,8 +1,10 @@
 // 缓存 注意：当栏目、碎片、站点基本信息稳定后可以开启，提高性能。
 export const CACHE = process.env.CACHE === "false" ? false : true;
 export const CACHE_KEY = 'app_init_data';
+export const WEB_CACHE_KEY = 'web_init_data';
 
 export default {
   CACHE,
-  CACHE_KEY
+  CACHE_KEY,
+  WEB_CACHE_KEY
 };

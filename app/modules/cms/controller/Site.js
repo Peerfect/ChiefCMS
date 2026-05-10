@@ -1,7 +1,7 @@
 import { Controller, common, cache, Paths } from "chanjs";
 const { config } = Chan;
 const { success, fail } = common;
-const { CACHE_KEY } = config;
+import { clearWebCache } from "../../../common/cacheclear.js";
 
 import Site from "../service/Site.js";
 
@@ -21,9 +21,8 @@ class SiteController extends Controller {
     try {
       const body = req.body;
       const result = await Site.updateInfo(body);
-      // 清除缓存
-      cache.del(CACHE_KEY);
-     res.json(this.success(result));
+      clearWebCache(req);
+      res.json(this.success(result));
     } catch (err) {
       next(err);
     }
