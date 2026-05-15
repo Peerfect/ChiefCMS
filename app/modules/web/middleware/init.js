@@ -30,11 +30,11 @@ export default () => {
 
       // 站点数据（site、category、friendlink、frag、tag）
       const { site, category, friendlink, frag, tag } = await home.init();
-      const nav = tree(category);
+      const nav = tree(category || []);
 
       // 模板配置
       const { domain = "", template: dbTemplate = "" } = site || {};
-      const finalTemplate = dbTemplate || template;
+      const finalTemplate = dbTemplate || template || "default";
       config.template = finalTemplate;
       config.data.site = site || {};
 
@@ -45,12 +45,12 @@ export default () => {
         domain: domain || "",
         static_url: `/public/view/${finalTemplate}/`,
         APP_VERSION,
-        site,
+        site: site || {},
         nav,
-        category,
-        friendlink,
-        frag,
-        tag,
+        category: category || [],
+        friendlink: friendlink || [],
+        frag: frag || [],
+        tag: tag || [],
       };
 
       Object.assign(req.app.locals, localsData);

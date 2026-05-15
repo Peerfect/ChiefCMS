@@ -14,7 +14,8 @@ export const homeView = (nav) => {
     Array.isArray(nav) &&
     nav.length > 0 &&
     nav[0].pinyin == "home" &&
-    nav[0].listView
+    nav[0].listView &&
+    nav[0].listView !== "list.html"
   ) {
     const { type, listView, articleView } = nav[0];
     // type: 0-栏目(渲染列表模板) 1-页面(渲染内容模板)

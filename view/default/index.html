@@ -9,6 +9,85 @@
     <meta property="og:description" content="{{site.description}}" />
     <title>{{site.title}}-{{site.name}}</title>
     {{include './common/meta.html'}}
+    <style>
+        .index-top { display: flex; gap: 20px; margin-bottom: 20px; }
+        .index-top-left { flex: 1; display: flex; gap: 15px; }
+        .index-top-left .top-banner { width: 520px; flex-shrink: 0; position: relative; border-radius: 6px; overflow: hidden; }
+        .index-top-left .top-banner img { width: 100%; aspect-ratio: 1.669 / 1; object-fit: cover; }
+        .index-top-left .top-banner .banner-text { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 15px; background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: #fff; font-size: 14px; }
+        .index-top-left .top-articles { flex: 1; overflow: hidden; }
+        .index-top-left .top-articles h2 { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+        .index-top-left .top-articles h2 a { color: #333; }
+        .index-top-left .top-articles h2 a:hover { color: #6d6de6; }
+        .top-news-list { list-style: none; padding: 0; margin: 0; }
+        .top-news-list .top-news-big { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .top-news-list .top-news-big a { font-size: 17px; font-weight: bold; color: #333; line-height: 1.5; }
+        .top-news-list .top-news-big a:hover { color: #e74c3c; }
+        .top-news-list .top-news-small { padding: 7px 0; border-bottom: 1px solid #f5f5f5; position: relative; padding-left: 12px; }
+        .top-news-list .top-news-small::before { content: '·'; position: absolute; left: 0; top: 7px; color: #999; font-size: 18px; line-height: 1; }
+        .top-news-list .top-news-small a { font-size: 14px; color: #555; line-height: 1.6; }
+        .top-news-list .top-news-small a:hover { color: #e74c3c; }
+        .index-top-left .top-articles ul li a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+        .index-top-right { width: 300px; flex-shrink: 0; border: 1px solid #e8e8e8; border-radius: 6px; padding: 15px; }
+        .index-top-right .sidebar-title { font-size: 16px; font-weight: bold; padding-top: 10px; margin-bottom: 10px; border-top: 1px solid #e0e0e0; position: relative; }
+        .index-top-right .sidebar-title::before { content: ''; position: absolute; top: -1.5px; left: 0; width: 40px; height: 2px; background-color: #6d6de6; }
+
+        .index-mid { display: flex; gap: 20px; margin-bottom: 20px; }
+        .index-mid-left { flex: 1; display: flex; gap: 20px; }
+        .index-mid-section { flex: 1; }
+        .index-mid-section .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-top: 10px; border-top: 1px solid #e0e0e0; position: relative; }
+        .index-mid-section .section-header::before { content: ''; position: absolute; top: -1.5px; left: 0; width: 40px; height: 2px; background-color: #6d6de6; }
+        .index-mid-section .section-header h3 { font-size: 16px; font-weight: bold; }
+        .index-mid-section .section-header .more-link { font-size: 13px; color: #999; }
+        .index-mid-right { width: 300px; flex-shrink: 0; }
+
+        .hot-item { display: flex; gap: 12px; margin-bottom: 15px; }
+        .hot-item .hot-img { width: 120px; height: 80px; flex-shrink: 0; border-radius: 4px; overflow: hidden; }
+        .hot-item .hot-img img { width: 100%; height: 100%; object-fit: cover; }
+        .hot-item .hot-info h4 { font-size: 14px; font-weight: bold; margin-bottom: 6px; line-height: 1.4; }
+        .hot-item .hot-info h4 a { color: #333; }
+        .hot-item .hot-info h4 a:hover { color: #6d6de6; }
+        .hot-item .hot-info p { font-size: 12px; color: #999; line-height: 1.5; }
+
+        .article-list-simple li { padding: 7px 0; font-size: 14px; border-bottom: 1px dashed #eee; }
+        .article-list-simple li a { color: #555; }
+        .article-list-simple li a:hover { color: #6d6de6; }
+
+        .index-channel { background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; padding: 15px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; }
+        .index-channel .channel-title { font-size: 18px; font-weight: bold; color: #6d6de6; white-space: nowrap; }
+        .index-channel .channel-title::after { content: ' >'; }
+        .index-channel .channel-links { display: flex; gap: 15px; flex-wrap: wrap; flex: 1; }
+        .index-channel .channel-links a { font-size: 14px; color: #555; }
+        .index-channel .channel-links a:hover { color: #6d6de6; }
+        .index-channel .channel-desc { font-size: 13px; color: #6d6de6; white-space: nowrap; }
+
+        .index-video { display: flex; gap: 20px; margin-bottom: 20px; }
+        .index-video-left { flex: 1; }
+        .index-video-left .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-top: 10px; border-top: 1px solid #e0e0e0; position: relative; }
+        .index-video-left .section-header::before { content: ''; position: absolute; top: -1.5px; left: 0; width: 40px; height: 2px; background-color: #6d6de6; }
+        .index-video-left .section-header h3 { font-size: 16px; font-weight: bold; }
+        .index-video-left .section-header .more-link { font-size: 13px; color: #999; }
+        .video-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .video-item { border-radius: 6px; overflow: hidden; }
+        .video-item img { width: 100%; aspect-ratio: 1.669 / 1; object-fit: cover; border-radius: 4px; }
+        .video-item p { font-size: 13px; color: #555; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .index-video-right { width: 300px; flex-shrink: 0; border: 1px solid #e8e8e8; border-radius: 6px; padding: 15px; }
+        .index-video-right .sidebar-title { font-size: 16px; font-weight: bold; padding-top: 10px; margin-bottom: 15px; border-top: 1px solid #e0e0e0; position: relative; }
+        .index-video-right .sidebar-title::before { content: ''; position: absolute; top: -1.5px; left: 0; width: 40px; height: 2px; background-color: #6d6de6; }
+
+        .index-friendlink { border: 1px solid #e8e8e8; border-radius: 6px; padding: 15px 20px; margin-bottom: 20px; }
+        .index-friendlink .fl-title { font-size: 16px; font-weight: bold; color: #333; padding-left: 10px; border-left: 3px solid #6d6de6; margin-bottom: 12px; }
+        .index-friendlink .fl-links { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+        .index-friendlink .fl-links a { font-size: 14px; color: #555; }
+        .index-friendlink .fl-links a:hover { color: #6d6de6; }
+
+        .sidebar-recommend li { padding: 12px 0; border-bottom: 1px dashed #eee; display: flex; align-items: center; gap: 10px; }
+        .sidebar-recommend li .rec-num { width: 24px; height: 24px; background: #6d6de6; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+        .sidebar-recommend li a { font-size: 14px; color: #555; }
+        .sidebar-recommend li a:hover { color: #6d6de6; }
+
+        .ad-img { width: 100%; border-radius: 6px; margin-bottom: 10px; }
+    </style>
 </head>
 
 <body>
@@ -16,181 +95,181 @@
     <!-- 头部 -->
     {{include './common/header.html'}}
 
-    <!-- 头条文章 -->
-    <main class="bg-f2f2f2 pt-10 pb-20 flex">
-        <div class="main center mt-10 flex gap-20">
-            <!-- 最新文章 -->
-            <article class="article-index">
-                <section class="flex flex-wrap justify-between gap-10  mb-20">
-                    {{ if banner&&banner.length>0}}
-                    <div class="swiper">
-                        <div class="swiper-wrapper">
-                            {{each banner}}
-                            <div class="swiper-slide">
-                                <a href="{{$value.linkUrl}}" title="{{$value.title}}">
-                                    <img src="{{$value.imgUrl}}" title="{{$value.title}}" alt="{{$value.title}}">
-                                </a>
-                            </div>
-                            {{/each}}
-                        </div>
-                        <div class="swiper-pagination"></div>
-                        <div class="swiper-button-next"></div>
-                        <div class="swiper-button-prev"></div>
+    <main class="pt-20 pb-20">
+        <div class="main center">
+
+            <!-- 第一行：顶部大图 + 文章列表 + 右侧栏 -->
+            <div class="index-top">
+                <div class="index-top-left">
+                    {{if banner && banner.length > 0}}
+                    <div class="top-banner">
+                        <a href="{{banner[0].linkUrl}}" title="{{banner[0].title}}">
+                            <img src="{{banner[0].imgUrl}}" alt="{{banner[0].title}}">
+                            <div class="banner-text">{{banner[0].title}}</div>
+                        </a>
                     </div>
                     {{/if}}
-
-                    <div class="w-520 h-290 bg-fff pd-20">
-
-                        {{if top}}
-                        <div class="flex justify-between">
-                            <h2 class="f-16 ellips-2 c-1a1a1a">{{top.title}}</h2>
-                            <p class="f-14  ellips-3  mb-10 mt-10">
-                                {{top.description}}<a class="c-003a8c" href="{{top.path}}/article-{{top.id}}.html"
-                                    title="{{top.title}}">详情</a>
-                            </p>
-                        </div>
-                        {{/if}}
-
-                        {{if news}}
-                        <ul class="w-460-list">
+                    <div class="top-articles">
+                        {{if news && news.length > 0}}
+                        <ul class="top-news-list">
                             {{each news}}
-                            <li class="f-14 pt-4 pb-4 flex justify-between">
-                                <a href="{{$value.path}}/article-{{$value.id}}.html"
-                                    title="{{$value.title}}">{{$value.title}}</a>
-                                <time class="c-999">{{ dateFormat($value.createdAt, 'YYYY-MM-DD') }}</time>
-                            </li>
+                            {{if $index === 0 || $index === 5}}
+                            <li class="top-news-big"><a href="{{$value.path}}/article-{{$value.id}}.html" title="{{$value.title}}">{{$value.title}}</a></li>
+                            {{else}}
+                            <li class="top-news-small"><a href="{{$value.path}}/article-{{$value.id}}.html" title="{{$value.title}}">{{$value.title}}</a></li>
+                            {{/if}}
                             {{/each}}
                         </ul>
                         {{/if}}
-
                     </div>
-
-                </section>
-                <section class="flex flex-wrap justify-between gap-10">
-                    {{each article.list}}
-                    <div class="w-460 bg-fff pd-20">
-                        <h3 class="m-title f-16 flex justify-between border-dashed mb-10">{{$value.category.name}}<span
-                                class="more"><a href="{{$value.category.path}}/index.html">更多</a></span></h3>
-                        {{if $value.top.title}}
-                        <figure class="flex justify-between">
-                            <div class="thumb-120">
-                                <img class="w-p100" src="{{$value.top.img}}" alt="{{$value.top.title}}"
-                                    title="{{$value.top.title}}">
-                            </div>
-                            <div class="flex-1">
-                                <figcaption class="f-14 ellips-2 bold mb-4">{{$value.top.title}}</figcaption>
-                                <p class="f-13 ellips-3">
-                                    {{$value.top.description}}
-                                    <a href="{{$value.top.path}}/{{$value.top.id}}.html"
-                                        title="{{$value.top.title}}">详情</a>
-                                </p>
-                            </div>
-                        </figure>
-                        {{/if}}
-
-                        {{if $value.list&&$value.list.length>0}}
-                        <ul class="w-460-list mt-16">
-                            {{each $value.list}}
-                            <li class="f-14 pt-4 pb-4 flex justify-between"><a
-                                    href="{{$value.path}}/article-{{$value.id}}.html"
-                                    {{$value.title}}>{{$value.title}}</a><time class="c-999">{{
-                                    dateFormat($value.createdAt, 'YYYY-MM-DD HH:mm:ss') }}</time></li>
-                            {{/each}}
-                        </ul>
-                        {{/if}}
-
-                        {{if $value.tags&&$value.tags.length>0}}
-                        <p class="mt-10 flex">
-                            {{each $value.tags}}
-                            <a class="el-tag mr-5" href="/tags/{{$value.name}}.html">{{$value.name}}</a>
-                            {{/each}}
-                        </p>
-                        {{/if}}
-                    </div>
-                    {{/each}}
-                </section>
-                {{if imgs.length>0}}
-                <!-- 书籍/图片/视频 pdf -->
-                <section class="mt-10">
-                    <h3 class="m-title title-dashed f-16 flex justify-between">最新图文<span class="more">new</span></h3>
-                    <div class="flex gap-2 flex-wrap">
-                        {{each imgs}}
-                        <figure class="books-item  f-14  pd-16 bg-fff">
-                            <a class="m-img" href="{{$value.path}}/article-{{$value.id}}.html" title="{{$value.title}}">
-                                <img src="{{$value.img}}" alt="{{$value.title}}" /></a>
-                            <figcaption class="mt-6 mb-6">
-                                <a href="{{$value.path}}/article-{{$value.id}}.html"
-                                    title="{{$value.title}}">{{$value.title}}</a>
-                            </figcaption>
-                        </figure>
-                        {{/each}}
-                    </div>
-                </section>
-                {{/if}}
-            </article>
-
-            <aside class="flex-1">
-                <!-- 介绍文本 -->
-                {{if frag["chancms"]}}
-                <section class="notices pd-20 mb-20 bg-fff">
-                    {{@ frag["chancms"]}}
-                </section>
-                {{/if}}
-
-                <!-- 通知 -->
-                <section class="notices pd-20 mb-20 bg-fff">
-                    <h3 class="m-title border-dashed f-16 flex justify-between">推荐文章<span class="more">HOT</span>
-                    </h3>
-                    <ul class="mt-10">
+                </div>
+                <div class="index-top-right">
+                    <div class="sidebar-title">推荐文章</div>
+                    <ul class="sidebar-recommend">
                         {{each recommend}}
-                        <li class="f-14 pt-4 pb-4 flex justify-between">
-                            <a href="{{$value.path}}/article-{{$value.id}}.html"
-                                title="{{$value.title}}">「荐」{{$value.title}}</a>
+                        <li>
+                            <span class="rec-num">{{$index + 1}}</span>
+                            <a href="{{$value.path}}/article-{{$value.id}}.html" title="{{$value.title}}">{{$value.title}}</a>
                         </li>
                         {{/each}}
                     </ul>
-                </section>
+                </div>
+            </div>
 
-                <!-- tag标签 -->
-                <section class="notices pd-20 mb-20 bg-fff">
-                    <h3 class="m-title border-dashed f-16 flex justify-between">tag标签</h3>
-                    <p class="mt-10">
-                        {{each tag}}
-                        <a class="el-tag mr-5 mb-5"
-                            href="/tags/{{$value.path}}/tag.html?tag={{$value.name}}">{{$value.name}}</a>
-                        {{/each}}
-                    </p>
-                </section>
+            <!-- 实时行情 -->
+            {{include './common/market-ticker.html'}}
 
-                <!-- 友情链接 -->
-                <section class="notices pd-20 mb-20 bg-fff">
-                    <h3 class="m-title border-dashed f-16 flex justify-between">友情链接</h3>
-                    <p class="mt-10">
-                        {{each friendlink}}
-                        <a class="el-tag mr-5 mb-5" href="{{$value.link}}">{{$value.title}}</a>
-                        {{/each}}
-                    </p>
-                </section>
-
-                {{if recommendImgs.length>0}}
-                <section class="notices pd-20 mb-20 bg-fff">
-                    <h3 class="m-title border-dashed f-16 flex justify-between">推荐图文</h3>
-                    {{each recommendImgs}}
-                    <figure class="flex justify-between mt-10 border-dashed">
-                        <div class="thumb mb-10"><img class="w-p100" src="{{$value.img}}" alt="{{$value.title}}"
-                                title="{{$value.title}}"></div>
-                        <div class="flex-1  mb-20">
-                            <figcaption class="f-14 ellips-2 bold mt-4 mb-4">{{$value.title}}</figcaption>
-                            <p class="f-13 ellips-3">
-                                {{$value.description}}
-                                <a href="{{$value.path}}/article-{{$value.id}}.html" title="{{$value.title}}">详情</a>
-                            </p>
+            <!-- 第二行：热门推荐 + 文章列表 + 右侧广告 -->
+            <div class="index-mid">
+                <div class="index-mid-left">
+                    <!-- 热门推荐 -->
+                    <div class="index-mid-section">
+                        <div class="section-header">
+                            <h3>热门推荐</h3>
                         </div>
-                    </figure>
+                        {{each article.list}}
+                        {{if $index < 3}}
+                        <div class="hot-item">
+                            {{if $value.top && $value.top.img}}
+                            <div class="hot-img">
+                                <a href="{{$value.top.path}}/article-{{$value.top.id}}.html">
+                                    <img src="{{$value.top.img}}" alt="{{$value.top.title}}">
+                                </a>
+                            </div>
+                            {{/if}}
+                            <div class="hot-info">
+                                {{if $value.top}}
+                                <h4><a href="{{$value.top.path}}/article-{{$value.top.id}}.html">{{$value.top.title}}</a></h4>
+                                <p>{{$value.top.description}}</p>
+                                {{/if}}
+                            </div>
+                        </div>
+                        {{/if}}
+                        {{/each}}
+                    </div>
+
+                    <!-- 最新文章 -->
+                    <div class="index-mid-section">
+                        <div class="section-header">
+                            <h3>最新文章</h3>
+                            <a class="more-link" href="#">更多</a>
+                        </div>
+                        <ul class="article-list-simple">
+                            {{each article.list}}
+                            {{if $value.list && $value.list.length > 0}}
+                            {{each $value.list}}
+                            <li><a href="{{$value.path}}/article-{{$value.id}}.html" title="{{$value.title}}">{{$value.title}}</a></li>
+                            {{/each}}
+                            {{/if}}
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
+                <div class="index-mid-right">
+                    {{if imgs && imgs.length > 0}}
+                    {{each imgs}}
+                    {{if $index < 2}}
+                    <a href="{{$value.path}}/article-{{$value.id}}.html">
+                        <img class="ad-img" src="{{$value.img}}" alt="{{$value.title}}">
+                    </a>
+                    {{/if}}
                     {{/each}}
-                </section>
-                {{/if}}
-            </aside>
+                    {{/if}}
+                </div>
+            </div>
+
+            <!-- 频道横栏 -->
+            {{if nav && nav.length > 0}}
+            <div class="index-channel">
+                <span class="channel-title">{{nav[0].name || '频道'}}</span>
+                <div class="channel-links">
+                    {{each nav}}
+                    {{if $index > 0 && $index < 6}}
+                    <a href="{{$value.path}}/index.html">{{$value.name}}</a>
+                    {{/if}}
+                    {{/each}}
+                </div>
+                <span class="channel-desc">{{site.description}}</span>
+            </div>
+            {{/if}}
+
+            <!-- 图文区域 -->
+            {{if imgs && imgs.length > 0}}
+            <div class="index-video">
+                <div class="index-video-left">
+                    <div class="section-header">
+                        <h3>最新图文</h3>
+                        <a class="more-link" href="#">更多</a>
+                    </div>
+                    <div class="video-grid">
+                        {{each imgs}}
+                        <div class="video-item">
+                            <a href="{{$value.path}}/article-{{$value.id}}.html">
+                                <img src="{{$value.img}}" alt="{{$value.title}}">
+                            </a>
+                            <p><a href="{{$value.path}}/article-{{$value.id}}.html">{{$value.title}}</a></p>
+                        </div>
+                        {{/each}}
+                    </div>
+                </div>
+                <div class="index-video-right">
+                    <div class="sidebar-title">tag标签</div>
+                    <p style="line-height: 2;">
+                        {{each tag}}
+                        <a class="el-tag mr-5 mb-5" href="/tags/{{$value.path}}/tag.html?tag={{$value.name}}">{{$value.name}}</a>
+                        {{/each}}
+                    </p>
+                </div>
+            </div>
+            {{/if}}
+
+            <!-- 底部导航横栏 -->
+            {{if nav && nav.length > 0}}
+            <div class="index-channel">
+                <span class="channel-title">{{site.name || '导航'}}</span>
+                <div class="channel-links">
+                    {{each nav}}
+                    {{if $value.pinyin != 'home'}}
+                    <a href="{{$value.path}}/index.html">{{$value.name}}</a>
+                    {{/if}}
+                    {{/each}}
+                </div>
+                <span class="channel-desc">更多热点资讯，尽在{{site.name}}</span>
+            </div>
+            {{/if}}
+
+            <!-- 友情链接 -->
+            {{if friendlink && friendlink.length > 0}}
+            <div class="index-friendlink">
+                <div class="fl-title">友情链接</div>
+                <div class="fl-links">
+                    {{each friendlink}}
+                    <a href="{{$value.link}}" target="_blank">{{$value.title}}</a>
+                    {{/each}}
+                </div>
+            </div>
+            {{/if}}
+
         </div>
     </main>
 

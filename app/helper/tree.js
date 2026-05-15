@@ -1,7 +1,7 @@
 
 // 无限极分类tree
 export function tree(arr, pid = 0) {
-  if(arr.length === 0){
+  if(!arr || arr.length === 0){
     return []
   }
   let result = [];

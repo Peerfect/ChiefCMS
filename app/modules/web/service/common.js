@@ -489,10 +489,13 @@ async getArticleListByCid({ cid, pageSize = 5, attr = [], start = 0, excludeAttr
 
       let list = [];
       for (let item of cate) {
-        const [_top, _list] = await Promise.all([
+        const [_topResult, _listResult] = await Promise.all([
           common.getArticleListByCid({ cid: item.id, pageSize: toplen, attr }),
           common.getArticleListByCid({ cid: item.id, pageSize: len }),
         ]);
+
+        const _top = _topResult?.list?.[0] || null;
+        const _list = _listResult?.list || [];
 
         let tagsPromises = _list.map((sub) =>
           common.getTagsFromArticleByAid(sub.id)

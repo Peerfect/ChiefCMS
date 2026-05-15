@@ -25,7 +25,22 @@ class HomeController extends Controller {
       const { nav, template, category } = req.app.locals;
       const defaultView = homeView(nav);
       const data = await home.home(category);
-      res.render(`${template}/${defaultView}`, { ...data, nav });
+      // 确保模板中所有变量有默认值，防止配置缺失时报错
+      const safeData = {
+        banner: [],
+        top: null,
+        news: [],
+        article: { list: [] },
+        articleList: { total: 0, current: 1, pageSize: 10, list: [] },
+        imgs: [],
+        frag: {},
+        recommend: [],
+        tag: [],
+        friendlink: [],
+        recommendImgs: [],
+        ...data,
+      };
+      res.render(`${template}/${defaultView}`, { ...safeData, nav, cate: {} });
     } catch (error) {
       console.error(error);
       next(error);

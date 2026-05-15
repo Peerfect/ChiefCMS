@@ -10,6 +10,18 @@ const home = {
     const config = Chan.config?.data?.init || {};
     const apiCalls = getApiCalls(config, {}, common);
 
+    // 如果没有配置init，使用默认查询获取基础数据
+    if (Object.keys(apiCalls).length === 0) {
+      const [site, category, friendlink, frag, tag] = await Promise.all([
+        common.site(),
+        common.category(),
+        common.friendLink({}),
+        common.frag({}),
+        common.tag({}),
+      ]);
+      return { site, category, friendlink, frag, tag };
+    }
+
     // 使用Promise.all并行执行所有api调用，并通过解构赋值获取结果
     let results = await Promise.all(Object.values(apiCalls));
 
@@ -49,6 +61,18 @@ const home = {
     if (categoryConfig && Object.keys(categoryConfig).length > 0) {
       config = categoryConfig;
     }
+
+    // 如果没有配置home，使用默认查询
+    if (!config || Object.keys(config).length === 0) {
+      const [article, banner, recommend, imgs, news] = await Promise.all([
+        common.getArticleListByCids({}),
+        common.bannerSlide({}),
+        common.getArticleList({ attr: "1", pageSize: 10 }),
+        common.getNewImgList({ pageSize: 6 }),
+        common.getArticleList({ pageSize: 10 }),
+      ]);
+      return { article, banner, recommend, imgs, news };
+    }
     
     const apiCalls = getApiCalls(config, {}, common);
 
@@ -75,6 +99,12 @@ const home = {
       config = categoryConfig;
     }
     
+    // 如果没有配置list，使用默认查询
+    if (!config || Object.keys(config).length === 0) {
+      const articleList = await common.list({ cid, page });
+      return { articleList };
+    }
+
     const apiCalls = getApiCalls(
       config,
       {
@@ -107,6 +137,16 @@ const home = {
       config = categoryConfig;
     }
     
+    // 如果没有配置article，使用默认查询
+    if (!config || Object.keys(config).length === 0) {
+      const [recommend, prev, next] = await Promise.all([
+        common.getArticlePvList({ pageSize: 10, cid }),
+        common.prev({ id, cid }),
+        common.next({ id, cid }),
+      ]);
+      return { recommend, prev, next };
+    }
+
     const apiCalls = getApiCalls(
       config,
       {
@@ -139,6 +179,12 @@ const home = {
       config = categoryConfig;
     }
 
+    // 如果没有配置page，使用默认查询
+    if (!config || Object.keys(config).length === 0) {
+      const page = await common.list({ cid, page: 1, pageSize: 20 });
+      return { page };
+    }
+
     const apiCalls = getApiCalls(
       config,
       {
@@ -162,6 +208,13 @@ const home = {
 
   async search({ keywords = "", page = 1 }) {
     const config = Chan.config.data.search;
+
+    // 如果没有配置search，使用默认查询
+    if (!config || Object.keys(config).length === 0) {
+      const search = await common.tags({ path: keywords, page });
+      return { search: { count: search.total, list: search.list } };
+    }
+
     const apiCalls = getApiCalls(
       config,
       {
@@ -186,6 +239,13 @@ const home = {
 
   async tag({ path, page = 1 }) {
     const config = Chan.config.data.tags;
+
+    // 如果没有配置tags，使用默认查询
+    if (!config || Object.keys(config).length === 0) {
+      const tags = await common.tags({ path, page });
+      return { tags };
+    }
+
     const apiCalls = getApiCalls(
       config,
       {

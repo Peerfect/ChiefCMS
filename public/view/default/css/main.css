@@ -1,5 +1,31 @@
 /* 通用 */
 
+body, .bg-f2f2f2 {
+    background-color: #fff !important;
+    padding-top: 110px;
+}
+
+/* 全局图片比例 1.669:1 */
+.img-ratio {
+    aspect-ratio: 1.669 / 1;
+    object-fit: cover;
+    width: 100%;
+}
+
+article img,
+.top-banner img,
+.hot-img img,
+.video-item img,
+.m-img img,
+.swiper-slide img,
+.list-img-item img,
+.thumb img,
+.thumb-120 img,
+.books-item img,
+.ad-img {
+    aspect-ratio: 1.669 / 1;
+    object-fit: cover;
+}
 
 a {
     color: #262626
@@ -97,27 +123,50 @@ html {
 }
 
 .w-1280 {
-    width: 1280px;
+    width: calc(75% + 100px);
+    max-width: 1500px;
 }
 
 .center {
     margin: 0 auto;
 }
 
-/* 首页 - 现代化头部设计 */
+/* 首页 - 现代化头部设�?*/
 .header-wrap {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
-    background-color: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(229, 231, 235, 0.5);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background-color: #6d6de6;
+    border-bottom: 1px solid rgba(109, 109, 230, 0.8);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.header-collapsed {
+    transform: translateY(-60px);
+}
+
+.header-top {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-collapsed .header-top {
+    pointer-events: none;
+}
+
+.header-nav {
+    background-color: #5b5bd4;
+    padding: 4px 0;
 }
 
 .header {
-    max-width: 1800px;
-    width: 1280px;
+    max-width: 1500px;
+    width: calc(75% + 100px);
     padding: 8px 0;
 }
 
@@ -142,7 +191,7 @@ html {
 
 .header-wrap .nav {}
 
-/* 搜索框 - 现代化设计 */
+/* 搜索�?- 现代化设�?*/
 .search {
     border: 1px solid #e5e7eb;
     border-radius: 8px;
@@ -155,9 +204,9 @@ html {
 }
 
 .search:focus-within {
-    border-color: #3b82f6;
+    border-color: #6d6de6;
     background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 3px rgba(109, 109, 230, 0.1);
 }
 
 .search-input {
@@ -172,91 +221,105 @@ html {
 }
 
 
-/* 导航样式 - 现代化设计 */
+/* 导航样式 - 现代化设�?*/
 .header-wrap .nav-item {
     position: relative;
-    height: 44px;
-    line-height: 44px;
-    padding-left: 16px;
-    padding-right: 16px;
+    height: 50px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .header-wrap .nav-item a {
-    font-size: 15px;
-    padding-left: 6px;
-    padding-right: 6px;
-    display: block;
-    color: #4b5563;
+    font-size: 16px;
+    color: #ffffff;
     font-weight: 500;
     transition: all 0.3s ease;
-    border-radius: 6px;
+    position: relative;
+}
+
+.header-wrap .nav-item a::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 0;
+    height: 3px;
+    background-color: #fff;
+    border-radius: 1px;
+    transition: width 0.3s ease;
+}
+
+.header-wrap .nav-item a:hover::after,
+.header-wrap .nav-item.active a::after {
+    width: 100%;
+}
+
+/* 有子菜单时不显示底部导航条 */
+.header-wrap .nav-item:hover .sub-nav ~ a::after,
+.header-wrap .nav-item:has(.sub-nav):hover > a::after {
+    width: 0 !important;
 }
 
 .header-wrap .nav-item a:hover {
-    color: #3b82f6;
-    background-color: rgba(59, 130, 246, 0.08);
+    color: #ffffff;
 }
 
 .header-wrap .nav-item:hover a {
-    color: #3b82f6;
+    color: #ffffff;
 }
 
-/* 子导航 - 现代化设计 */
+/* 子导航 */
 .header-wrap .sub-nav::before {
     content: "";
     position: absolute;
-    top: -8px;
+    top: -6px;
     left: 50%;
     transform: translateX(-50%);
-    border-width: 6px;
+    border-width: 0 6px 6px 6px;
     border-style: solid;
-    border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent;
+    border-color: transparent transparent #6d6de6 transparent;
 }
 
 .header-wrap .sub-nav {
     display: none;
     position: absolute;
-    left: 50%;
-    padding: 8px 0;
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
-    border-radius: 12px;
+    top: 100%;
+    left: 0;
+    padding: 6px 0;
+    background-color: #6d6de6;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 0 0 6px 6px;
     z-index: 10;
-    transform: translate(-50%, 8px);
     width: auto;
-    min-width: 160px;
-    border: 1px solid rgba(229, 231, 235, 0.6);
-    animation: fadeInDown 0.2s ease-out;
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translate(-50%, 0);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, 8px);
-    }
+    min-width: 140px;
+    margin-top: 0;
 }
 
 .header-wrap .sub-nav-item {
     margin-bottom: 0;
-    padding: 0 4px;
+    padding: 0;
 }
 
 .header-wrap .sub-nav-item a {
-    padding: 8px 16px;
+    padding: 8px 20px;
     font-size: 14px;
     line-height: 1.5;
     white-space: nowrap;
-    border-radius: 6px;
-    margin: 2px 4px;
+    display: block;
+    color: #fff;
+    transition: all 0.2s ease;
+}
+
+.header-wrap .sub-nav-item a::after {
+    display: none;
 }
 
 .header-wrap .sub-nav-item a:hover {
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 .header-wrap .nav-item:hover .sub-nav {
@@ -267,22 +330,8 @@ html {
     position: relative;
 }
 
-.header-wrap .nav-item > a::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -20px;
-    height: 20px;
-}
-
 .header-wrap .sub-nav::after {
-    content: "";
-    position: absolute;
-    top: -20px;
-    left: 0;
-    right: 0;
-    height: 20px;
+    display: none;
 }
 
 .ico-open {
@@ -421,13 +470,17 @@ html {
 
 /* main - 现代化布局 */
 .main {
-    width: 1280px;
+    width: calc(75% + 100px);
+    max-width: 1500px;
     flex-wrap: nowrap;
     min-height: calc(100vh - 210px);
     gap: 24px;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    padding: 20px;
 }
 
-/* 卡片样式 - 现代化设计 */
+/* 卡片样式 - 现代化设�?*/
 .w-460, .w-520, .notices, .books-item {
     border-radius: 12px;
     background-color: #fff;
@@ -441,7 +494,7 @@ html {
     transform: translateY(-2px);
 }
 
-/* 标题样式 - 现代化设计 */
+/* 标题样式 - 现代化设�?*/
 .m-title {
     padding-bottom: 16px;
     font-family: 'chanyue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -465,7 +518,7 @@ html {
 }
 
 .more:hover {
-    color: #3b82f6;
+    color: #6d6de6;
 }
 
 .flex-wrap {
@@ -481,13 +534,19 @@ html {
 }
 
 .article-index {
-    width: 930px;
+    width: 1400px;
     flex-shrink: 0;
 }
 
 .article-aside {
     width: 330px;
     flex-shrink: 0;
+}
+
+.main > aside {
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    padding: 20px;
 }
 
 .aside-index {
@@ -559,7 +618,7 @@ html {
     min-height: calc(100vh - 228px);
 }
 
-/* 分页样式 - 现代化设计 */
+/* 分页样式 - 现代化设�?*/
 .page ul {
     display: flex;
     flex-wrap: wrap;
@@ -582,8 +641,8 @@ html {
 }
 
 .page ul li:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    border-color: #6d6de6;
+    box-shadow: 0 4px 12px rgba(109, 109, 230, 0.15);
     transform: translateY(-1px);
 }
 
@@ -610,13 +669,13 @@ html {
 }
 
 .page ul li:hover a {
-    color: #3b82f6;
+    color: #6d6de6;
 }
 
 .page ul li.current {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #6d6de6 0%, #5555d4 100%);
     border: none;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 14px rgba(109, 109, 230, 0.4);
     border-radius: 8px;
     padding: 10px 18px;
     color: #fff;
@@ -626,7 +685,7 @@ html {
 
 .page ul li.current:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 6px 20px rgba(109, 109, 230, 0.5);
 }
 
 /* list-img.html */
@@ -886,7 +945,7 @@ html {
 }
 
 .article-cont input[type=checkbox]:checked:after {
-    content: "✓";
+    content: "�?;
     position: absolute;
     top: -5px;
     left: 0;
@@ -1129,7 +1188,7 @@ iframe {
     }
 
     .drawer .nav-item:hover {
-        background-color: rgba(59, 130, 246, 0.08);
+        background-color: rgba(109, 109, 230, 0.08);
     }
 
     .drawer .nav-item a {
@@ -1140,7 +1199,7 @@ iframe {
     }
 
     .drawer .nav-item:hover a {
-        color: #3b82f6;
+        color: #6d6de6;
     }
 
 
@@ -1153,7 +1212,7 @@ iframe {
     }
 
     .drawer .sub-nav-item::before {
-        content: '•';
+        content: '�?;
         display: inline-block;
         color: #b2abab;
         position: relative;
@@ -1171,7 +1230,7 @@ iframe {
         margin-bottom: 16px;
     }
 
-    /* 移动端分页优化 */
+    /* 移动端分页优�?*/
     .page ul {
         gap: 6px;
     }

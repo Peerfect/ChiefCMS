@@ -1,0 +1,96 @@
+<section class="market-ticker">
+    <div class="market-section-header">
+        <h3>实时行情</h3>
+    </div>
+    <div class="market-cards">
+        <div class="market-card" id="tv-gold"></div>
+        <div class="market-card" id="tv-oil"></div>
+        <div class="market-card" id="tv-btc"></div>
+        <div class="market-card" id="tv-silver"></div>
+    </div>
+</section>
+
+<style>
+.market-ticker {
+    margin-bottom: 20px;
+}
+.market-section-header {
+    padding-top: 0;
+    padding-bottom: 12px;
+    margin-bottom: 15px;
+    border-top: 1px solid #e0e0e0;
+    position: relative;
+}
+.market-section-header::before {
+    content: '';
+    position: absolute;
+    top: -1.5px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background-color: #6d6de6;
+}
+.market-section-header h3 {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+}
+.market-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+.market-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    overflow: hidden;
+    height: 300px;
+}
+</style>
+
+<script>
+(function() {
+    const configs = [
+        { id: 'tv-gold', symbol: 'TVC:GOLD' },
+        { id: 'tv-oil', symbol: 'TVC:USOIL' },
+        { id: 'tv-btc', symbol: 'BINANCE:BTCUSDT' },
+        { id: 'tv-silver', symbol: 'TVC:SILVER' }
+    ];
+
+    configs.forEach(cfg => {
+        const el = document.getElementById(cfg.id);
+        if (!el) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'tradingview-widget-container';
+        wrapper.style.height = '100%';
+        wrapper.style.width = '100%';
+
+        const inner = document.createElement('div');
+        inner.className = 'tradingview-widget-container__widget';
+        inner.style.height = '100%';
+        inner.style.width = '100%';
+        wrapper.appendChild(inner);
+
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
+        script.async = true;
+        script.textContent = JSON.stringify({
+            "symbol": cfg.symbol,
+            "width": "100%",
+            "height": "100%",
+            "locale": "zh_CN",
+            "dateRange": "1D",
+            "colorTheme": "light",
+            "isTransparent": true,
+            "autosize": true,
+            "largeChartUrl": ""
+        });
+        wrapper.appendChild(script);
+
+        el.appendChild(wrapper);
+    });
+})();
+</script>
