@@ -27,6 +27,40 @@
                 "ENV_FILE": ".env.prd",
                 "NODE_ENV": "prd"
             }
+        },
+        {
+            "name": "sync-flash-news",
+            "script": "scripts/sync-flash-news.js",
+            "args": ["--daemon"],
+            "watch": false,
+            "log_date_format": "YYYY-MM-DD HH:mm Z",
+            "error_file": "./logs/flash-news-err.log",
+            "out_file": "./logs/flash-news-out.log",
+            "merge_logs": true,
+            "exec_mode": "fork",
+            "max_memory_restart": "100M",
+            "autorestart": true,
+            "instances": 1,
+            "env": {
+                "NODE_ENV": "prd"
+            }
+        },
+        {
+            "name": "sync-news",
+            "script": "scripts/sync-news.js",
+            "args": ["--daemon"],
+            "watch": false,
+            "log_date_format": "YYYY-MM-DD HH:mm Z",
+            "error_file": "./logs/sync-news-err.log",
+            "out_file": "./logs/sync-news-out.log",
+            "merge_logs": true,
+            "exec_mode": "fork",
+            "max_memory_restart": "100M",
+            "autorestart": true,
+            "instances": 1,
+            "env": {
+                "NODE_ENV": "prd"
+            }
         }
     ]
 }

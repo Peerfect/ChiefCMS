@@ -5,6 +5,21 @@ body, .bg-f2f2f2 {
     padding-top: 110px;
 }
 
+.el-tag {
+    display: inline-block;
+    padding: 6px 18px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.el-tag:hover {
+    border-color: #6d6de6;
+    color: #6d6de6;
+}
+
 /* 全局图片比例 1.669:1 */
 .img-ratio {
     aspect-ratio: 1.669 / 1;
@@ -477,7 +492,7 @@ html {
     gap: 24px;
     border: 1px solid #e8e8e8;
     border-radius: 8px;
-    padding: 20px;
+    padding: 7px 20px 20px;
 }
 
 /* 卡片样式 - 现代化设�?*/

@@ -1,0 +1,131 @@
+<section class="flash-news-section">
+    <div class="market-section-header">
+        <h3>实时快讯</h3>
+    </div>
+    <div class="flash-news-date" id="flashDate"></div>
+    <div class="flash-news-list" id="flashNewsList">
+        <div class="flash-loading">加载中...</div>
+    </div>
+</section>
+
+<style>
+.flash-news-section {
+    padding: 0;
+    margin-bottom: 20px;
+}
+.flash-news-date {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 12px;
+    padding-left: 5px;
+}
+.flash-news-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.flash-item {
+    display: flex;
+    padding: 10px 0;
+    border-left: 2px solid #e8e8e8;
+    padding-left: 15px;
+    margin-left: 5px;
+    position: relative;
+}
+.flash-item::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 14px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+}
+.flash-item.important {
+    border-left-color: #e74c3c;
+}
+.flash-item.important::before {
+    background: #e74c3c;
+}
+.flash-item .flash-time {
+    font-size: 13px;
+    color: #999;
+    white-space: nowrap;
+    margin-right: 12px;
+    min-width: 60px;
+}
+.flash-item.important .flash-time {
+    color: #e74c3c;
+}
+.flash-item .flash-content {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.6;
+}
+.flash-item.important .flash-content {
+    color: #e74c3c;
+}
+.flash-loading {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+}
+</style>
+
+<script>
+(function() {
+    function formatTime(dateStr) {
+        const d = new Date(dateStr);
+        const h = String(d.getHours()).padStart(2, '0');
+        const m = String(d.getMinutes()).padStart(2, '0');
+        const s = String(d.getSeconds()).padStart(2, '0');
+        return h + ':' + m + ':' + s;
+    }
+
+    function formatDate() {
+        const d = new Date();
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
+        const weekdays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+        return month + '月' + day + '日 ' + weekdays[d.getDay()];
+    }
+
+    function renderFlashNews(data) {
+        const container = document.getElementById('flashNewsList');
+        const dateEl = document.getElementById('flashDate');
+
+        dateEl.textContent = formatDate();
+
+        if (!data || !data.list || data.list.length === 0) {
+            container.innerHTML = '<div class="flash-loading">暂无快讯数据</div>';
+            return;
+        }
+
+        let html = '';
+        data.list.forEach(item => {
+            const cls = item.important ? 'flash-item important' : 'flash-item';
+            html += '<div class="' + cls + '">';
+            html += '<span class="flash-time">' + formatTime(item.publishAt) + '</span>';
+            html += '<span class="flash-content">' + item.content + '</span>';
+            html += '</div>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    async function loadFlashNews() {
+        try {
+            const res = await fetch('/api/flash-news');
+            const data = await res.json();
+            renderFlashNews(data);
+        } catch(e) {
+            console.error('快讯加载失败:', e);
+        }
+    }
+
+    loadFlashNews();
+    // 每60秒刷新一次
+    setInterval(loadFlashNews, 60000);
+})();
+</script>

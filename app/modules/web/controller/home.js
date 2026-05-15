@@ -22,7 +22,7 @@ class HomeController extends Controller {
   // 首页
   async index(req, res, next) {
     try {
-      const { nav, template, category } = req.app.locals;
+      const { nav, template, category, tag, friendlink, frag } = req.app.locals;
       const defaultView = homeView(nav);
       const data = await home.home(category);
       // 确保模板中所有变量有默认值，防止配置缺失时报错
@@ -33,10 +33,10 @@ class HomeController extends Controller {
         article: { list: [] },
         articleList: { total: 0, current: 1, pageSize: 10, list: [] },
         imgs: [],
-        frag: {},
+        frag: frag || {},
         recommend: [],
-        tag: [],
-        friendlink: [],
+        tag: tag || [],
+        friendlink: friendlink || [],
         recommendImgs: [],
         ...data,
       };

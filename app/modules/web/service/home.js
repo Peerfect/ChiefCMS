@@ -17,7 +17,7 @@ const home = {
         common.category(),
         common.friendLink({}),
         common.frag({}),
-        common.tag({}),
+        common.tag({ pageSize: 100 }),
       ]);
       return { site, category, friendlink, frag, tag };
     }

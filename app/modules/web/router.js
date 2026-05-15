@@ -74,30 +74,13 @@ export default async (app, router, config) => {
     controller.home.tag
   );
 
-  // 行情数据代理接口
-  router.get("/api/market-quotes", async (req, res) => {
+  // 行情表格代理接口
+  router.get("/api/market-table", async (req, res) => {
     try {
-      const { type } = req.query;
-      if (!type) return res.json({ error: 'type required' });
+      const { codes } = req.query;
+      if (!codes) return res.json({ data: [] });
 
-      const MARKET_MAP = {
-        tw_stock: 'TWS:TSE01:INDEX,TWS:OTC01:INDEX,TWS:2330:STOCK,TWS:2317:STOCK',
-        hk_stock: 'HKS:HSI:INDEX,HKS:HSCCI:INDEX,SHS:000001:INDEX,SZS:399001:INDEX',
-        asia: 'JPS:N225:INDEX,KRS:KOSPI:INDEX,SPS:STI:INDEX,INS:SENSEX:INDEX',
-        futures: 'CME:NQ:FUTURES,CME:ES:FUTURES,SGX:CN:FUTURES,CME:YM:FUTURES',
-        eu_stock: 'FRS:FCHI:INDEX,GES:GDAXI:INDEX,UKS:UKX:INDEX,SWS:SSMI:INDEX',
-        us_stock: 'USS:DJI:INDEX,USS:SPX:INDEX,USS:COMP:INDEX,USS:SOX:INDEX',
-        oil_gold: 'CME:GC:FUTURES,CME:SI:FUTURES,CME:CL:FUTURES,ICE:BRN:FUTURES',
-        agriculture: 'CME:S:FUTURES,CME:C:FUTURES,CME:W:FUTURES,ICE:SB:FUTURES',
-        bond: 'USS:US10Y:BOND,USS:US2Y:BOND,USS:US30Y:BOND,JPS:JP10Y:BOND',
-        crypto: 'CRY:BTC:CRYPTO,CRY:ETH:CRYPTO,CRY:BNB:CRYPTO,CRY:XRP:CRYPTO'
-      };
-
-      const codes = MARKET_MAP[type];
-      if (!codes) return res.json({ error: 'invalid type' });
-
-      const symbols = codes.split(',');
-      const url = `https://ws.api.cnyes.com/ws/api/v1/quote/quotes/${symbols.join(',')}?column=C,E,K,M,N,O,P,S,V,W`;
+      const url = `https://ws.api.cnyes.com/ws/api/v1/quote/quotes/${codes}?column=C,E,K,M,N,O,P,S,V,W`;
       const response = await fetch(url, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -106,14 +89,87 @@ export default async (app, router, config) => {
         }
       });
 
-      if (!response.ok) {
-        return res.json({ error: 'upstream error', status: response.status });
-      }
-
+      if (!response.ok) return res.json({ data: [] });
       const data = await response.json();
       res.json(data);
     } catch (error) {
-      console.error('Market quotes proxy error:', error.message);
+      res.json({ data: [] });
+    }
+  });
+
+  // 快讯数据接口
+  router.get("/api/flash-news", async (req, res) => {
+    try {
+      const hasTable = await Chan.db.schema.hasTable('cms_flash_news');
+      if (!hasTable) {
+        return res.json({ list: [] });
+      }
+      const list = await Chan.db('cms_flash_news')
+        .select('id', 'content', 'important', 'publishAt')
+        .orderBy('publishAt', 'desc')
+        .limit(50);
+      res.json({ list });
+    } catch (error) {
+      res.json({ list: [] });
+    }
+  });
+
+  // 轻量价格接口（只返回最新价）
+  router.get("/api/market-price", async (req, res) => {
+    try {
+      const { symbol } = req.query;
+      if (!symbol) return res.json({});
+      const r = await fetch(`https://data-api.binance.vision/api/v3/ticker/24hr?symbol=${symbol}`);
+      const d = await r.json();
+      res.json({
+        symbol: d.symbol,
+        price: parseFloat(d.lastPrice) || 0,
+        change: parseFloat(d.priceChange) || 0,
+        changePct: parseFloat(d.priceChangePercent) || 0,
+      });
+    } catch(e) {
+      res.json({});
+    }
+  });
+
+  // 行情数据接口（币安）
+  router.get("/api/market-quotes", async (req, res) => {
+    try {
+      const symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT'];
+      
+      // 逐个获取24小时行情
+      const tickerPromises = symbols.map(s =>
+        fetch(`https://data-api.binance.vision/api/v3/ticker/24hr?symbol=${s}`).then(r => r.json())
+      );
+      const tickers = await Promise.all(tickerPromises);
+
+      // 获取每个品种的K线
+      const klinePromises = symbols.map(s =>
+        fetch(`https://data-api.binance.vision/api/v3/klines?symbol=${s}&interval=5m&limit=60`).then(r => r.json())
+      );
+      const klines = await Promise.all(klinePromises);
+
+      const result = symbols.map((symbol, i) => {
+        const ticker = tickers[i] || {};
+        const kline = klines[i] || [];
+        
+        return {
+          symbol,
+          price: parseFloat(ticker.lastPrice) || 0,
+          change: parseFloat(ticker.priceChange) || 0,
+          changePct: parseFloat(ticker.priceChangePercent) || 0,
+          high: parseFloat(ticker.highPrice) || 0,
+          low: parseFloat(ticker.lowPrice) || 0,
+          volume: parseFloat(ticker.quoteVolume) || 0,
+          prices: Array.isArray(kline) ? kline.map(k => parseFloat(k[4])) : [],
+          startTime: Array.isArray(kline) && kline.length > 0 ? kline[0][0] : null,
+          endTime: Array.isArray(kline) && kline.length > 0 ? kline[kline.length - 1][6] : null,
+        };
+      });
+
+      res.json({ data: result });
+    } catch (error) {
+      console.error('Market quotes error:', error.message);
       res.status(500).json({ error: error.message });
     }
   });

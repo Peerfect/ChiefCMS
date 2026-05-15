@@ -14,40 +14,8 @@
 <body class="bg-f8f8f8 pos-r">
     {{include './common/header.html'}}
 
-    <main class="bg-f2f2f2 pt-10 pb-20 flex">
-        <div class="main center mt-10 flex gap-20">
-            <aside class="flex-1">
-                <section class="notices pd-20 mb-20 bg-fff">
-                    <h3 class="m-title border-dashed f-16 flex justify-between">tag标签</h3>
-                    <p class="mt-10">
-                        {{each tag}}
-                        <a class="el-tag mr-5 mb-5"
-                            href="/tags/{{$value.path}}/tag.html?tag={{$value.name}}">{{$value.name}}</a>
-                        {{/each}}
-                    </p>
-                </section>
-
-                {{if frag.ad}}
-                <section class="ad mb-20 bg-fff">
-                    {{@ frag.ad}}
-                </section>
-                {{/if}}
-
-                <section class="notices pos-s pd-20 mb-20 bg-fff" style="top:80px;z-index: 2;">
-                    <h3 class="m-title border-dashed f-16 flex justify-between bold">{{cate.name}}</h3>
-                    {{if page?.list?.length>0}}
-                    <ul class="mt-10">
-                        {{each page.list}}
-                        <li class="f-16 pt-4 pb-4 flex bold pl-10">
-                            <a href="{{$value.path}}/page-{{$value.id}}.html"
-                                title="{{$value.title}}">{{$value.title}}</a>
-                        </li>
-                        {{/each}}
-                    </ul>
-                    {{/if}}
-                </section>
-            </aside>
-
+    <main class="pt-20 pb-20 flex">
+        <div class="main center mt-3 flex gap-20">
             <article class="article-index">
                 <div class="bg-fff radius-6 pd-25 content">
                     {{if article?.content}}

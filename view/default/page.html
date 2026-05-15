@@ -17,45 +17,9 @@
     {{include './common/header.html'}}
 
     <!-- 头条文章 -->
-    <main class="bg-f2f2f2 pt-10 pb-20 flex">
+    <main class="pt-20 pb-20 flex">
 
-        <div class="main center mt-10 flex gap-20">
-            <aside class="flex-1">
-                <!-- tag标签 -->
-                <section class="notices pd-20 mb-20 bg-fff">
-                    <h3 class="m-title border-dashed f-16 flex justify-between">tag标签</h3>
-                    <p class="mt-10">
-                        {{each tag}}
-                        <a class="el-tag mr-5 mb-5"
-                            href="/tags/{{$value.path}}/tag.html?tag={{$value.name}}">{{$value.name}}</a>
-                        {{/each}}
-                    </p>
-                </section>
-
-                <!-- 广告 -->
-                {{if frag.ad}}
-                <section class="ad mb-20 bg-fff">
-                    {{@ frag.ad}}
-                </section>
-                {{/if}}
-
-                <!-- 单页栏目 -->
-                <section class="notices pos-s pd-20 mb-20 bg-fff" style="top:80px;z-index: 2;">
-                    <h3 class="m-title border-dashed f-16 flex justify-between bold">{{cate.name}}</h3>
-                    {{if page?.list?.length>0}}
-                    <ul class="mt-10">
-                        {{each page.list}}
-                        <li class="f-16 pt-4 pb-4 flex bold  pl-10">
-                            <a href="{{$value.path}}/page-{{$value.id}}.html"
-                                title="{{$value.title}}">{{$value.title}}</a>
-                        </li>
-                        {{/each}}
-                    </ul>
-                    {{/if}}
-                </section>
-
-            </aside>
-
+        <div class="main center mt-3 flex gap-20">
             <!-- 最新文章 -->
             <article class="article-index">
                 <!-- <div class="bg-fff radius-6 pd-15 mb-1 f-14 c-999">

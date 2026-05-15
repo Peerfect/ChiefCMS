@@ -15,8 +15,8 @@
     {{include './common/header.html'}}
 
     <!-- 头条文章 -->
-    <main class="bg-f2f2f2 pt-10 pb-20 flex">
-        <div class="main center mt-10 flex gap-20">
+    <main class="pt-20 pb-20 flex">
+        <div class="main center mt-3 flex gap-20">
             <!-- 最新文章 -->
             <article class="article-index">
                 <div class="bg-fff pd-15 mb-1 f-14 c-999 radius-6">
@@ -79,24 +79,6 @@
                 </div>
 
             </article>
-
-            <aside class="flex-1">
-                <!-- tag标签 -->
-                <section class="notices pd-20 mb-20 bg-fff">
-                    <h3 class="m-title border-dashed f-16 flex justify-between">tag标签</h3>
-                    <p class="mt-10">
-                        {{each tag}}
-                        <a class="el-tag mr-5 mb-5"
-                            href="/tags/{{$value.path}}/tag.html?tag={{$value.name}}">{{$value.name}}</a>
-                        {{/each}}
-                    </p>
-                </section>
-
-                <!-- 广告 -->
-                <section class="ad mb-20 bg-fff">
-                    {{@ frag.ad || ''}}
-                </section>
-            </aside>
         </div>
     </main>
 

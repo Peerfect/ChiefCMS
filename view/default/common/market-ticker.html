@@ -2,95 +2,319 @@
     <div class="market-section-header">
         <h3>实时行情</h3>
     </div>
-    <div class="market-cards">
-        <div class="market-card" id="tv-gold"></div>
-        <div class="market-card" id="tv-oil"></div>
-        <div class="market-card" id="tv-btc"></div>
-        <div class="market-card" id="tv-silver"></div>
-    </div>
+    <div class="market-cards" id="marketCards"></div>
 </section>
 
 <style>
-.market-ticker {
-    margin-bottom: 20px;
-}
-.market-section-header {
-    padding-top: 0;
-    padding-bottom: 12px;
-    margin-bottom: 15px;
-    border-top: 1px solid #e0e0e0;
-    position: relative;
-}
-.market-section-header::before {
-    content: '';
-    position: absolute;
-    top: -1.5px;
-    left: 0;
-    width: 40px;
-    height: 2px;
-    background-color: #6d6de6;
-}
-.market-section-header h3 {
-    font-size: 16px;
-    font-weight: bold;
-    color: #333;
-    margin-top: 10px;
-}
-.market-cards {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-}
-.market-card {
-    border: 1px solid #e8e8e8;
-    border-radius: 6px;
-    overflow: hidden;
-    height: 300px;
+.market-ticker { margin-bottom: 20px; }
+.market-section-header { padding-top:0; padding-bottom:12px; margin-bottom:15px; border-top:1px solid #e0e0e0; position:relative; }
+.market-section-header::before { content:''; position:absolute; top:-1.5px; left:0; width:40px; height:2px; background-color:#6d6de6; }
+.market-section-header h3 { font-size:16px; font-weight:bold; color:#333; margin-top:10px; }
+.market-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; }
+.market-card { border:1px solid #e8e8e8; border-radius:6px; padding:15px; overflow:hidden; }
+.market-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+.market-card-name { font-size:14px; font-weight:bold; color:#333; }
+.market-card-sub { font-size:12px; color:#999; margin-top:2px; }
+.market-card-pct { font-size:13px; font-weight:500; padding:2px 6px; border-radius:3px; }
+.market-card-pct.up { color:#e74c3c; background:#fef2f2; }
+.market-card-pct.down { color:#27ae60; background:#f0fdf4; }
+.market-card-price { font-size:22px; font-weight:bold; margin-bottom:2px; }
+.market-card-price.up { color:#e74c3c; }
+.market-card-price.down { color:#27ae60; }
+.market-card-change { font-size:12px; color:#999; margin-bottom:10px; }
+.market-card-chart { width:100%; height:80px; display:block; }
+.market-card-chart-wrap { position:relative; height:80px; }
+.market-card-tooltip { position:absolute; top:-4px; padding:3px 6px; background:rgba(0,0,0,0.75); color:#fff; font-size:11px; border-radius:3px; white-space:nowrap; pointer-events:none; transform:translateX(-50%); z-index:10; display:none; }
+.market-card-crosshair { position:absolute; top:0; bottom:0; width:1px; background:rgba(0,0,0,0.15); pointer-events:none; display:none; z-index:5; }
+.market-card-dot { position:absolute; width:6px; height:6px; border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); display:none; z-index:6; }
+.market-card-footer { display:flex; justify-content:space-between; font-size:11px; color:#bbb; margin-top:5px; }
+
+@keyframes pulse {
+    0% { opacity:1; transform:scale(1); }
+    50% { opacity:0.4; transform:scale(1.8); }
+    100% { opacity:1; transform:scale(1); }
 }
 </style>
 
 <script>
 (function() {
-    const configs = [
-        { id: 'tv-gold', symbol: 'TVC:GOLD' },
-        { id: 'tv-oil', symbol: 'TVC:USOIL' },
-        { id: 'tv-btc', symbol: 'BINANCE:BTCUSDT' },
-        { id: 'tv-silver', symbol: 'TVC:SILVER' }
-    ];
+    const NAMES = {
+        BTCUSDT: { name: '比特币', sub: 'BTC/USDT' },
+        ETHUSDT: { name: '以太坊', sub: 'ETH/USDT' },
+        BNBUSDT: { name: '币安币', sub: 'BNB/USDT' },
+        XRPUSDT: { name: '瑞波币', sub: 'XRP/USDT' }
+    };
 
-    configs.forEach(cfg => {
-        const el = document.getElementById(cfg.id);
-        if (!el) return;
+    const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT'];
+    let cardData = {}; // 存储每个品种的数据
+    let initialized = false;
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'tradingview-widget-container';
-        wrapper.style.height = '100%';
-        wrapper.style.width = '100%';
+    function drawChart(canvas, prices, isUp) {
+        if (!prices || prices.length < 2) return;
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.scale(dpr, dpr);
 
-        const inner = document.createElement('div');
-        inner.className = 'tradingview-widget-container__widget';
-        inner.style.height = '100%';
-        inner.style.width = '100%';
-        wrapper.appendChild(inner);
+        const padRight = 8; // 右侧留白，防止圆点被裁切
+        const drawW = w - padRight;
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        const range = max - min || 1;
+        const stepX = drawW / (prices.length - 1);
 
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
-        script.async = true;
-        script.textContent = JSON.stringify({
-            "symbol": cfg.symbol,
-            "width": "100%",
-            "height": "100%",
-            "locale": "zh_CN",
-            "dateRange": "1D",
-            "colorTheme": "light",
-            "isTransparent": true,
-            "autosize": true,
-            "largeChartUrl": ""
+        // 面积填充
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        prices.forEach((p, i) => {
+            const x = i * stepX;
+            const y = h - ((p - min) / range) * (h * 0.85);
+            ctx.lineTo(x, y);
         });
-        wrapper.appendChild(script);
+        ctx.lineTo(drawW, h);
+        ctx.closePath();
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        if (isUp) {
+            grad.addColorStop(0, 'rgba(231,76,60,0.12)');
+            grad.addColorStop(1, 'rgba(231,76,60,0)');
+        } else {
+            grad.addColorStop(0, 'rgba(39,174,96,0.12)');
+            grad.addColorStop(1, 'rgba(39,174,96,0)');
+        }
+        ctx.fillStyle = grad;
+        ctx.fill();
 
-        el.appendChild(wrapper);
-    });
+        // 线条
+        ctx.beginPath();
+        prices.forEach((p, i) => {
+            const x = i * stepX;
+            const y = h - ((p - min) / range) * (h * 0.85);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = isUp ? '#e74c3c' : '#27ae60';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 最新价圆点（外圈光晕）
+        const lastX = (prices.length - 1) * stepX;
+        const lastY = h - ((prices[prices.length - 1] - min) / range) * (h * 0.85);
+        const color = isUp ? '#e74c3c' : '#27ae60';
+
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 6, 0, Math.PI * 2);
+        ctx.fillStyle = isUp ? 'rgba(231,76,60,0.2)' : 'rgba(39,174,96,0.2)';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 3, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function formatVol(v) {
+        if (v >= 1e9) return (v/1e9).toFixed(2) + 'B';
+        if (v >= 1e6) return (v/1e6).toFixed(2) + 'M';
+        if (v >= 1e3) return (v/1e3).toFixed(1) + 'K';
+        return v.toFixed(0);
+    }
+
+    function createCards() {
+        const container = document.getElementById('marketCards');
+        container.innerHTML = '';
+
+        SYMBOLS.forEach(symbol => {
+            const info = NAMES[symbol];
+            const card = document.createElement('div');
+            card.className = 'market-card';
+            card.id = 'card-' + symbol;
+            card.innerHTML = `
+                <div class="market-card-header">
+                    <div>
+                        <div class="market-card-name">${info.name}</div>
+                        <div class="market-card-sub">${info.sub}</div>
+                    </div>
+                    <span class="market-card-pct" id="pct-${symbol}">--</span>
+                </div>
+                <div class="market-card-price" id="price-${symbol}">--</div>
+                <div class="market-card-change" id="change-${symbol}">--</div>
+                <div class="market-card-chart-wrap" id="chartwrap-${symbol}">
+                    <canvas class="market-card-chart" id="chart-${symbol}"></canvas>
+                    <div class="market-card-crosshair" id="crosshair-${symbol}"></div>
+                    <div class="market-card-dot" id="dot-${symbol}"></div>
+                    <div class="market-card-tooltip" id="tooltip-${symbol}"></div>
+                </div>
+                <div class="market-card-footer"><span id="time-start-${symbol}">--:--</span><span id="time-end-${symbol}">--:--</span></div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function formatTime(ts) {
+        if (!ts) return '--:--';
+        const date = new Date(ts);
+        const h = String(date.getHours()).padStart(2, '0');
+        const m = String(date.getMinutes()).padStart(2, '0');
+        return h + ':' + m;
+    }
+
+    function bindChartEvents() {
+        SYMBOLS.forEach(symbol => {
+            const wrap = document.getElementById('chartwrap-' + symbol);
+            const canvas = document.getElementById('chart-' + symbol);
+            const crosshair = document.getElementById('crosshair-' + symbol);
+            const dot = document.getElementById('dot-' + symbol);
+            const tooltip = document.getElementById('tooltip-' + symbol);
+
+            if (!wrap || !canvas) return;
+
+            canvas.addEventListener('mousemove', function(e) {
+                const d = cardData[symbol];
+                if (!d || !d.prices || d.prices.length < 2) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const w = canvas.clientWidth;
+                const h = canvas.clientHeight;
+                const padRight = 8;
+                const drawW = w - padRight;
+                const stepX = drawW / (d.prices.length - 1);
+
+                // 找到最近的数据点索引
+                let idx = Math.round(mouseX / stepX);
+                idx = Math.max(0, Math.min(idx, d.prices.length - 1));
+
+                const price = d.prices[idx];
+                const firstPrice = d.prices[0];
+                const changePct = ((price - firstPrice) / firstPrice * 100).toFixed(2);
+                const sign = changePct >= 0 ? '+' : '';
+                const isUp = changePct >= 0;
+
+                const x = idx * stepX;
+                const min = Math.min(...d.prices);
+                const max = Math.max(...d.prices);
+                const range = max - min || 1;
+                const y = h - ((price - min) / range) * (h * 0.85);
+
+                // 显示十字线
+                crosshair.style.display = 'block';
+                crosshair.style.left = x + 'px';
+
+                // 显示圆点
+                dot.style.display = 'block';
+                dot.style.left = x + 'px';
+                dot.style.top = y + 'px';
+                dot.style.background = isUp ? '#e74c3c' : '#27ae60';
+
+                // 显示tooltip
+                tooltip.style.display = 'block';
+                tooltip.innerHTML = price.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) + ' <span style="color:' + (isUp ? '#ff6b6b' : '#69db7c') + '">' + sign + changePct + '%</span>';
+
+                // tooltip 位置，防止溢出
+                let tipLeft = x;
+                tooltip.style.left = tipLeft + 'px';
+            });
+
+            canvas.addEventListener('mouseleave', function() {
+                crosshair.style.display = 'none';
+                dot.style.display = 'none';
+                tooltip.style.display = 'none';
+            });
+        });
+    }
+
+    function updateCard(symbol) {
+        const d = cardData[symbol];
+        if (!d) return;
+
+        const isUp = d.change >= 0;
+        const sign = isUp ? '+' : '';
+        const cls = isUp ? 'up' : 'down';
+
+        const priceEl = document.getElementById('price-' + symbol);
+        const pctEl = document.getElementById('pct-' + symbol);
+        const changeEl = document.getElementById('change-' + symbol);
+        const canvas = document.getElementById('chart-' + symbol);
+        const timeStartEl = document.getElementById('time-start-' + symbol);
+        const timeEndEl = document.getElementById('time-end-' + symbol);
+
+        if (priceEl) {
+            priceEl.textContent = d.price.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+            priceEl.className = 'market-card-price ' + cls;
+        }
+        if (pctEl) {
+            pctEl.textContent = sign + d.changePct.toFixed(2) + '%';
+            pctEl.className = 'market-card-pct ' + cls;
+        }
+        if (changeEl) {
+            changeEl.textContent = sign + d.change.toFixed(2) + '  成交额 ' + formatVol(d.volume);
+        }
+        if (timeStartEl) {
+            timeStartEl.textContent = formatTime(d.startTime);
+        }
+        if (timeEndEl) {
+            timeEndEl.textContent = formatTime(d.endTime);
+        }
+        if (canvas && d.prices && d.prices.length > 1) {
+            drawChart(canvas, d.prices, isUp);
+        }
+    }
+
+    // 首次加载完整数据
+    async function loadFull() {
+        try {
+            const res = await fetch('/api/market-quotes');
+            const data = await res.json();
+            if (data && data.data) {
+                data.data.forEach(item => {
+                    cardData[item.symbol] = item;
+                    updateCard(item.symbol);
+                });
+                initialized = true;
+            }
+        } catch(e) {
+            console.error('行情加载失败:', e);
+        }
+    }
+
+    // 轻量更新：只获取最新价格
+    async function updatePrices() {
+        if (!initialized) return;
+        try {
+            const promises = SYMBOLS.map(s =>
+                fetch(`/api/market-price?symbol=${s}`).then(r => r.json())
+            );
+            const results = await Promise.all(promises);
+
+            results.forEach(item => {
+                if (!item || !item.symbol) return;
+                const d = cardData[item.symbol];
+                if (!d) return;
+
+                d.price = item.price;
+                d.change = item.change;
+                d.changePct = item.changePct;
+
+                // 更新图表最后一个点
+                if (d.prices && d.prices.length > 0) {
+                    d.prices[d.prices.length - 1] = item.price;
+                }
+
+                updateCard(item.symbol);
+            });
+        } catch(e) {}
+    }
+
+    createCards();
+    bindChartEvents();
+    loadFull();
+
+    // 每1秒轻量更新价格
+    setInterval(updatePrices, 1000);
+    // 每5分钟完整刷新K线数据
+    setInterval(loadFull, 300000);
 })();
 </script>
