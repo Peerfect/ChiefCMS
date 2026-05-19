@@ -23,6 +23,7 @@ export default async (app, router, config) => {
   //评论收藏接口
   router.get("/comments", userauth(), controller.Comment.getComments);
   router.post("/comment", userauth(), commentSecurity(), controller.Comment.addComment);
+  router.post("/commentAnonymous", controller.Comment.addCommentAnonymous);
   router.get("/deleteComment", userauth(), controller.Comment.deleteComment);
   router.post("/likeComment", userauth(), controller.Comment.likeComment);
   router.get("/articleComments", controller.Comment.articleComments);

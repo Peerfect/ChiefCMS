@@ -90,9 +90,12 @@ class HomeController extends Controller {
         await res.render(`${template}/404.html`);
         return;
       }
-      // if (article.content) {
-      //   article.content = htmlEncode(article.content);
-      // }
+
+      // 非阻塞增加浏览量
+      setImmediate(() => commonService.count({ id }));
+      // 前端显示时 pv +1
+      article.pv = (article.pv || 0) + 1;
+
       //栏目id
       const cid = article.cid || "";
       let { cate, position, view } = articleDataParse({

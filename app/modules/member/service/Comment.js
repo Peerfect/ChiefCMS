@@ -166,6 +166,81 @@ class CommentService extends Service {
   }
 
   /**
+   * @description 创建匿名评论（无需登录）
+   * @param {string} articleId - 文章ID
+   * @param {string} content - 评论内容
+   * @param {string|null} parentId - 父评论ID
+   * @param {string|null} replyToMemberId - 回复用户ID
+   * @param {string|null} replyToUsername - 回复用户名
+   * @param {string} nickname - 匿名昵称
+   * @param {string} email - 邮箱
+   * @returns {Object} - 评论对象
+   */
+  async createAnonymous(articleId, content, parentId = null, replyToMemberId = null, replyToUsername = null, nickname = '匿名用户', email = '') {
+    const cleanParentId = parentId && parentId !== 'undefined' ? parentId : null;
+    const cleanReplyToMemberId = replyToMemberId && replyToMemberId !== 'undefined' ? replyToMemberId : null;
+    const displayNickname = nickname || '匿名用户';
+    
+    // 插入评论，member_id 设为 0 表示匿名
+    const insertData = {
+      member_id: 0,
+      article_id: articleId,
+      content: content,
+      status: "2",
+      parent_id: cleanParentId,
+      reply_to_member_id: cleanReplyToMemberId,
+    };
+
+    // 尝试插入带 anonymous_nickname 字段，如果字段不存在则不带
+    let result;
+    try {
+      insertData.anonymous_nickname = displayNickname;
+      insertData.anonymous_email = email || null;
+      result = await this.insert(insertData);
+    } catch (e) {
+      if (e.code === 'ER_BAD_FIELD_ERROR') {
+        delete insertData.anonymous_nickname;
+        delete insertData.anonymous_email;
+        result = await this.insert(insertData);
+      } else {
+        throw e;
+      }
+    }
+    
+    let id;
+    if (Array.isArray(result)) {
+      id = result[0];
+    } else if (typeof result === 'object' && result !== null) {
+      if (result.data && result.data.insertId) {
+        id = result.data.insertId;
+      } else {
+        id = result.insertId || result.id || result[0];
+      }
+    } else {
+      id = result;
+    }
+    
+    id = parseInt(id, 10);
+    
+    return {
+      id: id || null,
+      content: content,
+      status: "2",
+      createdAt: new Date().toISOString(),
+      parent_id: cleanParentId,
+      reply_to_member_id: cleanReplyToMemberId,
+      reply_to_username: replyToUsername || null,
+      like_count: 0,
+      username: displayNickname,
+      nickname: displayNickname,
+      avatar: null,
+      member_id: 0,
+      replies: [],
+      is_liked: false
+    };
+  }
+
+  /**
    * @description 获取评论配置
    * @returns {Object} - 评论配置对象
    */
@@ -345,8 +420,7 @@ class CommentService extends Service {
     const total = totalResult[0].count || 0;
 
     const offset = parseInt((page - 1) * pageSize);
-    const rootList = await this.db(this.tableName)
-      .select([
+    let rootListSelect = [
         "member_comment.id",
         "member_comment.content",
         "member_comment.status",
@@ -358,24 +432,46 @@ class CommentService extends Service {
         "member.nickname",
         "member.avatar",
         "member_comment.member_id",
-      ])
-      .join("member", "member_comment.member_id", "member.id")
-      .where({ 
-        "member_comment.article_id": articleId, 
-        "member_comment.status": "2",
-        "member_comment.parent_id": null 
-      })
-      .orderBy("member_comment.createdAt", "desc")
-      .limit(pageSize)
-      .offset(offset);
+    ];
+
+    // 尝试查询带 anonymous_nickname，失败则不带
+    let rootList;
+    try {
+      rootList = await this.db(this.tableName)
+        .select([...rootListSelect, "member_comment.anonymous_nickname"])
+        .leftJoin("member", "member_comment.member_id", "member.id")
+        .where({ 
+          "member_comment.article_id": articleId, 
+          "member_comment.status": "2",
+          "member_comment.parent_id": null 
+        })
+        .orderBy("member_comment.createdAt", "desc")
+        .limit(pageSize)
+        .offset(offset);
+    } catch (e) {
+      if (e.code === 'ER_BAD_FIELD_ERROR') {
+        rootList = await this.db(this.tableName)
+          .select(rootListSelect)
+          .leftJoin("member", "member_comment.member_id", "member.id")
+          .where({ 
+            "member_comment.article_id": articleId, 
+            "member_comment.status": "2",
+            "member_comment.parent_id": null 
+          })
+          .orderBy("member_comment.createdAt", "desc")
+          .limit(pageSize)
+          .offset(offset);
+      } else {
+        throw e;
+      }
+    }
 
     const rootIds = rootList.map(c => c.id);
     let allRepliesList = [];
     
     if (rootIds.length > 0) {
       //获取所有回复评论
-      const repliesList = await this.db(this.tableName)
-        .select([
+      let repliesListSelect = [
           "member_comment.id",
           "member_comment.content",
           "member_comment.status",
@@ -387,11 +483,28 @@ class CommentService extends Service {
           "member.nickname",
           "member.avatar",
           "member_comment.member_id",
-        ])
-        .join("member", "member_comment.member_id", "member.id")
-        .where({ "member_comment.article_id": articleId, "member_comment.status": "2" })
-        .whereNotNull("member_comment.parent_id")
-        .orderBy("member_comment.createdAt", "asc");
+      ];
+
+      let repliesList;
+      try {
+        repliesList = await this.db(this.tableName)
+          .select([...repliesListSelect, "member_comment.anonymous_nickname"])
+          .leftJoin("member", "member_comment.member_id", "member.id")
+          .where({ "member_comment.article_id": articleId, "member_comment.status": "2" })
+          .whereNotNull("member_comment.parent_id")
+          .orderBy("member_comment.createdAt", "asc");
+      } catch (e) {
+        if (e.code === 'ER_BAD_FIELD_ERROR') {
+          repliesList = await this.db(this.tableName)
+            .select(repliesListSelect)
+            .leftJoin("member", "member_comment.member_id", "member.id")
+            .where({ "member_comment.article_id": articleId, "member_comment.status": "2" })
+            .whereNotNull("member_comment.parent_id")
+            .orderBy("member_comment.createdAt", "asc");
+        } else {
+          throw e;
+        }
+      }
       
       const allCommentsMap = {};
       rootList.forEach(c => {
@@ -418,6 +531,20 @@ class CommentService extends Service {
 
     const formattedRootList = formatDateFields(rootList, ['createdAt']);
     const formattedRepliesList = formatDateFields(allRepliesList, ['createdAt']);
+
+    // 匿名评论使用 anonymous_nickname 作为昵称
+    formattedRootList.forEach(comment => {
+      if (!comment.nickname && !comment.username) {
+        comment.nickname = comment.anonymous_nickname || '匿名用户';
+        comment.username = comment.anonymous_nickname || '匿名用户';
+      }
+    });
+    formattedRepliesList.forEach(reply => {
+      if (!reply.nickname && !reply.username) {
+        reply.nickname = reply.anonymous_nickname || '匿名用户';
+        reply.username = reply.anonymous_nickname || '匿名用户';
+      }
+    });
 
     const commentMap = {};
     formattedRootList.forEach(comment => {

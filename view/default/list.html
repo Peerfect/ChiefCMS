@@ -116,7 +116,7 @@
                                     <p class="f-12 c-bfbfbf mb-8">
                                         <i class="ico-20 ico-time pos-r t-4"></i> {{ dateFormat($value.createdAt,'YYYY-MM-DD') }}
                                         <i class="ico-20 ico-admin pos-r t-4 ml-4"></i> {{$value.author ||'admin'}}
-                                        <i class="ico-20 ico-view pos-r t-5 ml-4"></i> 阅读（{{$value.pv}}）
+                                        <i class="ico-20 ico-view pos-r t-5 ml-4"></i> 阅读（<span class="pv-count" data-id="{{$value.id}}">{{$value.pv}}</span>）
                                         <!-- <i class="ico-20 ico-zan pos-r t-4 ml-4"></i>点赞（95） -->
                                     </p>
                                     <p class="f-14 ellips-3 c-595959">
@@ -160,6 +160,21 @@
     <!-- 移动端导航 -->
     {{include './common/wap-nav.html'}}
     {{include './common/js.html'}}
+    <script>
+    // 点击文章链接时，阅读数即时+1
+    document.querySelectorAll('a[href*="/article-"]').forEach(function(link) {
+        link.addEventListener('click', function() {
+            var match = this.href.match(/article-(\d+)\.html/);
+            if (match) {
+                var id = match[1];
+                var pvEl = document.querySelector('.pv-count[data-id="' + id + '"]');
+                if (pvEl) {
+                    pvEl.textContent = parseInt(pvEl.textContent) + 1;
+                }
+            }
+        });
+    });
+    </script>
 </body>
 
 </html>

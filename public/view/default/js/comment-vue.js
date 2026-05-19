@@ -1,3 +1,6 @@
+// 默认头像 (data URI，避免文件加载问题)
+const DEFAULT_AVATAR = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><rect width="80" height="80" rx="40" fill="#e8eaed"/><circle cx="40" cy="30" r="12" fill="#9aa0a6"/><path d="M16 68c0-13.255 10.745-24 24-24s24 10.745 24 24" fill="#9aa0a6"/></svg>');
+
 // Vue 3 评论组件模板
 const commentTemplate = `
     <section class="comment-section" id="comments">
@@ -7,9 +10,13 @@ const commentTemplate = `
         </div>
 
         <!-- 主评论输入框 -->
-        <div class="main-comment-form" v-if="isLoggedIn">
+        <div class="main-comment-form">
             <div class="comment-input-wrapper">
                 <div class="comment-input-hint">平等表达，友善交流</div>
+                <div class="anonymous-info" v-if="!isLoggedIn" style="margin-bottom:10px;display:flex;gap:10px;">
+                    <input type="text" v-model="anonymousNickname" placeholder="昵称（选填）" maxlength="20" style="flex:1;padding:8px 12px;border:1px solid #e4e7ed;border-radius:4px;font-size:14px;outline:none;" />
+                    <input type="email" v-model="anonymousEmail" placeholder="邮箱（选填）" maxlength="50" style="flex:1;padding:8px 12px;border:1px solid #e4e7ed;border-radius:4px;font-size:14px;outline:none;" />
+                </div>
                 <textarea 
                     ref="mainTextarea"
                     v-model="mainCommentContent"
@@ -57,16 +64,12 @@ const commentTemplate = `
             </div>
         </div>
 
-        <!-- 登录提示 -->
-        <div class="comment-login-prompt" v-else>
-            <p>登录后参与评论、点赞和回复</p>
-            <a href="/public/member/index.html" class="login-btn">立即登录</a>
-        </div>
+
 
         <!-- 评论列表 -->
         <div class="comment-list">
-            <div class="comment-empty" v-if="loading">加载评论中...</div>
-            <div class="comment-empty" v-else-if="comments.length === 0">暂无评论，快来抢沙发吧~</div>
+            <div class="comment-empty" v-if="loading && comments.length === 0">加载评论中...</div>
+            <div class="comment-empty" v-else-if="!loading && comments.length === 0">暂无评论，快来抢沙发吧~</div>
             
             <!-- 主评论 -->
             <div 
@@ -77,7 +80,7 @@ const commentTemplate = `
             >
                 <div class="comment-main">
                     <div class="comment-avatar">
-                        <img :src="comment.avatar || '/images/default-avatar.svg'" :alt="comment.nickname" @error="$event.target.src='/images/default-avatar.svg'">
+                        <img :src="comment.avatar || defaultAvatar" :alt="comment.nickname" @error="handleAvatarError($event)">
                     </div>
                     <div class="comment-info">
                         <div class="comment-header">
@@ -327,8 +330,16 @@ createApp({
         // 文章 ID
         const articleId = ref(null);
         
-        // 登录状态
-        const isLoggedIn = computed(() => getCookie('ut') !== null);
+        // 登录状态 - 只在初始化时检查一次
+        const isLoggedIn = ref(false);
+        
+        // 默认头像
+        const defaultAvatar = DEFAULT_AVATAR;
+        function handleAvatarError(event) {
+            if (event.target.src !== DEFAULT_AVATAR) {
+                event.target.src = DEFAULT_AVATAR;
+            }
+        }
         
         // 评论数据
         const comments = ref([]);
@@ -342,6 +353,8 @@ createApp({
         // 主评论输入
         const mainCommentContent = ref('');
         const mainTextarea = ref(null);
+        const anonymousNickname = ref('');
+        const anonymousEmail = ref('');
         
         // 回复相关
         const replyBoxVisible = reactive({});
@@ -665,7 +678,7 @@ createApp({
                 
                 if (result.success) {
                     const list = result.data?.list || [];
-                    totalCount.value = result.data?.count || 0;
+                    totalCount.value = result.data?.total || 0;
                     
                     if (append) {
                         comments.value.push(...list);
@@ -698,23 +711,28 @@ createApp({
                 return;
             }
             
-            if (!isLoggedIn.value) {
-                showToast('请先登录', 'info');
-                return;
-            }
-            
             try {
-                const response = await fetch('/member/v1/comment', {
+                const body = {
+                    articleId: articleId.value,
+                    content: content,
+                    parentId: null,
+                    replyToMemberId: null,
+                    replyToUsername: null
+                };
+                
+                // 未登录时使用匿名评论接口
+                let url = '/member/v1/comment';
+                if (!isLoggedIn.value) {
+                    url = '/member/v1/commentAnonymous';
+                    body.nickname = anonymousNickname.value.trim() || '匿名用户';
+                    body.email = anonymousEmail.value.trim() || '';
+                }
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        articleId: articleId.value,
-                        content: content,
-                        parentId: null,
-                        replyToMemberId: null,
-                        replyToUsername: null
-                    })
+                    body: JSON.stringify(body)
                 });
                 
                 const result = await response.json();
@@ -764,23 +782,27 @@ createApp({
                 return;
             }
             
-            if (!isLoggedIn.value) {
-                showToast('请先登录', 'info');
-                return;
-            }
-            
             try {
-                const response = await fetch('/member/v1/comment', {
+                const body = {
+                    articleId: articleId.value,
+                    content: content,
+                    parentId: parentCommentId || commentId,
+                    replyToMemberId: reply.member_id,
+                    replyToUsername: reply.nickname || reply.username
+                };
+                
+                let url = '/member/v1/comment';
+                if (!isLoggedIn.value) {
+                    url = '/member/v1/commentAnonymous';
+                    body.nickname = anonymousNickname.value.trim() || '匿名用户';
+                    body.email = anonymousEmail.value.trim() || '';
+                }
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        articleId: articleId.value,
-                        content: content,
-                        parentId: parentCommentId || commentId,
-                        replyToMemberId: reply.member_id,
-                        replyToUsername: reply.nickname || reply.username
-                    })
+                    body: JSON.stringify(body)
                 });
                 
                 const result = await response.json();
@@ -848,6 +870,9 @@ createApp({
         
         // 初始化
         onMounted(() => {
+            // 检查登录状态（只检查一次）
+            isLoggedIn.value = getCookie('ut') !== null;
+            
             const articleElement = document.querySelector('article[data-article-id]');
             if (articleElement) {
                 articleId.value = articleElement.dataset.articleId;
@@ -860,6 +885,8 @@ createApp({
         
         return {
             isLoggedIn,
+            defaultAvatar,
+            handleAvatarError,
             comments,
             displayedComments,
             totalCount,
@@ -868,6 +895,8 @@ createApp({
             hasMore,
             mainCommentContent,
             mainTextarea,
+            anonymousNickname,
+            anonymousEmail,
             replyBoxVisible,
             replyBoxTarget,
             replyContent,

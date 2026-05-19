@@ -53,12 +53,8 @@
                         </p>
                     </header>
 
-                    {{if article.description}}
-                    <section class="introduction pd-10 border-6 mb-20 mt-20 lh-25 f-14 bg-f2f2f2">
-                        「导读」{{@ article.description}}
-                    </section>
-                    {{/if}}
-                    <article id="article" class="article-cont f-17 lh-35">
+
+                    <article id="article" data-article-id="{{article.id}}" class="article-cont f-17 lh-35">
                         <div class="markdown-body">{{@ renderMarkdown(article.content) }}</div>
                           <ul>
                             <li>文件名称：{{article?.field?.fileName}}</li>
@@ -89,6 +85,10 @@
                         {{/if}}
                     </p>
                 </footer>
+
+                <div class="bg-fff radius-6 mt-1 pd-25">
+                    <% include('./partials/comment-section.html') %>
+                </div>
 
             </article>
         </div>

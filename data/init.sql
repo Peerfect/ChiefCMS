@@ -428,6 +428,8 @@ CREATE TABLE `member_comment` (
   `parent_id` int(11) DEFAULT NULL COMMENT '父评论ID（用于回复功能）',
   `reply_to_member_id` int(11) DEFAULT NULL COMMENT '回复的会员ID',
   `like_count` int(11) DEFAULT '0' COMMENT '点赞数',
+  `anonymous_nickname` varchar(50) DEFAULT NULL COMMENT '匿名评论昵称',
+  `anonymous_email` varchar(100) DEFAULT NULL COMMENT '匿名评论邮箱',
   `createdAt` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updatedAt` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
