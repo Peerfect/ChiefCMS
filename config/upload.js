@@ -1,6 +1,6 @@
 export const upload = {
   logoSize: 50 * 1024, // 50kb
-  imgSize: 200 * 1024, // 200kb
+  imgSize: 1048 * 1024, // 1048kb
   fileSize: 10 * 1024 * 1024, // 10MB - 通用文件
   videoSize: 20 * 1024 * 1024, // 20MB - 视频
   pdfSize: 10 * 1024 * 1024, // 10MB - PDF

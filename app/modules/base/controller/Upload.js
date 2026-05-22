@@ -74,7 +74,7 @@ const getFileSizeLimit = (mimetype) => {
   }
   
   if (mimetype.startsWith("image/")) {
-    return uploadConfig.imgSize || 200 * 1024;
+    return uploadConfig.imgSize || 1048 * 1024;
   }
   
   return uploadConfig.fileSize || 10 * 1024 * 1024;

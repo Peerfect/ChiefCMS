@@ -1,4 +1,4 @@
-/*
+﻿/*
  Navicat Premium Dump SQL
 
  Source Server         : localhost
@@ -759,7 +759,7 @@ INSERT INTO `sys_config` (`id`, `type_code`, `config_key`, `config_value`, `stat
 INSERT INTO `sys_config` (`id`, `type_code`, `config_key`, `config_value`, `status`, `create_time`, `update_time`, `remark`) VALUES (13, 'cms_data', 'search', '{\r\n  \"search\": {\r\n    \"method\": \"search\",\r\n    \"params\": {\r\n      \"pageSize\": 10,\r\n      \"cid\": 0\r\n    }\r\n  }\r\n}', '1', '2025-07-30 11:23:53', '2025-11-30 16:38:58', '模板搜索列表数据');
 INSERT INTO `sys_config` (`id`, `type_code`, `config_key`, `config_value`, `status`, `create_time`, `update_time`, `remark`) VALUES (14, 'cms_data', 'tags', '{\r\n  \"tags\": {\r\n    \"method\": \"tags\",\r\n    \"params\": {\r\n      \"pageSize\": 10\r\n    }\r\n  }\r\n}', '1', '2025-07-30 11:24:06', '2025-11-30 16:38:48', '模板tag列表数据');
 INSERT INTO `sys_config` (`id`, `type_code`, `config_key`, `config_value`, `status`, `create_time`, `update_time`, `remark`) VALUES (15, 'upload_config', 'logoSize', '51200', '1', '2026-03-01 00:00:00', '2026-03-01 00:00:00', 'Logo上传大小限制（字节）');
-INSERT INTO `sys_config` (`id`, `type_code`, `config_key`, `config_value`, `status`, `create_time`, `update_time`, `remark`) VALUES (16, 'upload_config', 'imgSize', '204800', '1', '2026-03-01 00:00:00', '2026-03-01 00:00:00', '图片上传大小限制（字节）');
+INSERT INTO `sys_config` (`id`, `type_code`, `config_key`, `config_value`, `status`, `create_time`, `update_time`, `remark`) VALUES (16, 'upload_config', 'imgSize', '1073152', '1', '2026-03-01 00:00:00', '2026-03-01 00:00:00', '图片上传大小限制（字节）');
 INSERT INTO `sys_config` (`id`, `type_code`, `config_key`, `config_value`, `status`, `create_time`, `update_time`, `remark`) VALUES (17, 'upload_config', 'fileSize', '10485760', '1', '2026-03-01 00:00:00', '2026-03-01 00:00:00', '通用文件上传大小限制（字节）');
 INSERT INTO `sys_config` (`id`, `type_code`, `config_key`, `config_value`, `status`, `create_time`, `update_time`, `remark`) VALUES (18, 'upload_config', 'videoSize', '20971520', '1', '2026-03-01 00:00:00', '2026-03-01 00:00:00', '视频上传大小限制（字节）');
 INSERT INTO `sys_config` (`id`, `type_code`, `config_key`, `config_value`, `status`, `create_time`, `update_time`, `remark`) VALUES (19, 'upload_config', 'pdfSize', '11485760', '1', '2026-03-01 00:00:00', '2026-03-01 22:03:39', 'PDF上传大小限制（字节）');
