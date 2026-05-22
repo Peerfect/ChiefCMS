@@ -25,4 +25,8 @@ export default async (app, router, config) => {
   router.get("/search", controller.Api.search);
   router.get("/pvadd", controller.Api.pvadd);
   router.get("/captcha", controller.Api.captcha);
+
+  // 行情数据
+  router.get("/market-quotes-v2", controller.Api.marketQuotesV2);
+  router.get("/market-kline", controller.Api.marketKline);
 };

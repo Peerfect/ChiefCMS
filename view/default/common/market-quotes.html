@@ -1,0 +1,354 @@
+<!-- 热门行情 - 每个模块：标题 + 2个K线卡片 + 列表 -->
+<div class="market-quotes-widget">
+    <div style="padding-top:0;padding-bottom:12px;margin-bottom:0;border-top:1px solid #e0e0e0;position:relative;">
+        <span style="position:absolute;top:-1.5px;left:0;width:40px;height:2px;background-color:#6d6de6;display:block;"></span>
+        <h3 style="font-size:16px;font-weight:bold;color:#333;margin-top:10px;">热门行情</h3>
+    </div>
+    <div id="mqContainer"></div>
+    <div class="mq-footer">
+        <span class="mq-update-time" id="mqUpdateTime">--</span>
+        <span class="mq-refresh" id="mqRefresh">刷新</span>
+    </div>
+</div>
+
+<style>
+.market-quotes-widget { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+.mq-module { margin-top:20px; }
+.mq-module:first-child { margin-top:15px; }
+.mq-module-title { font-size:14px; font-weight:600; color:#333; padding:8px 0; border-bottom:2px solid #6d6de6; margin-bottom:12px; display:inline-block; }
+
+/* K线卡片 */
+.mq-kline-cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.mq-kline-card { border:1px solid #e8e8e8; border-radius:6px; padding:12px 15px; overflow:visible; }
+.mq-kline-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+.mq-kline-name { font-size:14px; font-weight:bold; color:#333; }
+.mq-kline-sub { font-size:11px; color:#999; margin-top:2px; }
+.mq-kline-pct { font-size:12px; font-weight:500; padding:2px 6px; border-radius:3px; }
+.mq-kline-pct.up { color:#e74c3c; background:#fef2f2; }
+.mq-kline-pct.down { color:#27ae60; background:#f0fdf4; }
+.mq-kline-price { font-size:20px; font-weight:bold; margin-bottom:2px; }
+.mq-kline-price.up { color:#e74c3c; }
+.mq-kline-price.down { color:#27ae60; }
+.mq-kline-change { font-size:11px; color:#999; margin-bottom:8px; }
+.mq-kline-chart-wrap { position:relative; height:60px; overflow:visible; padding-right:8px; }
+.mq-kline-chart { width:100%; height:60px; display:block; }
+
+/* 表格 */
+.mq-table { width:100%; border-collapse:collapse; font-size:13px; }
+.mq-table thead th { padding:8px 6px; text-align:right; color:#999; font-weight:normal; font-size:12px; border-bottom:1px solid #f0f0f0; }
+.mq-table thead th:first-child { text-align:left; }
+.mq-table tbody tr { border-bottom:1px solid #f8f8f8; transition:background .15s; }
+.mq-table tbody tr:hover { background:#fafafa; }
+.mq-table tbody td { padding:8px 6px; text-align:right; }
+.mq-table tbody td:first-child { text-align:left; }
+
+.mq-name { font-weight:500; color:#333; font-size:12px; }
+.mq-code { font-size:10px; color:#aaa; margin-left:4px; }
+.mq-up { color:#e74c3c; }
+.mq-down { color:#27ae60; }
+.mq-flat { color:#999; }
+.mq-pct-badge { display:inline-block; padding:1px 5px; border-radius:3px; font-size:11px; font-weight:500; min-width:55px; text-align:center; }
+.mq-pct-badge.up { color:#e74c3c; background:#fef2f2; }
+.mq-pct-badge.down { color:#27ae60; background:#f0fdf4; }
+.mq-pct-badge.flat { color:#999; background:#f5f5f5; }
+.mq-loading { text-align:center !important; color:#999; padding:15px 0 !important; font-size:12px; }
+.mq-footer { display:flex; justify-content:space-between; align-items:center; padding:10px 0; font-size:11px; color:#bbb; margin-top:10px; }
+.mq-refresh { color:#6d6de6; cursor:pointer; font-size:12px; }
+.mq-refresh:hover { text-decoration:underline; }
+</style>
+
+<script>
+(function() {
+    var MODULES = [
+        {
+            key: 'index', title: '热门指数',
+            symbols: [
+                { code: '^DJI', name: '道琼斯工业' },
+                { code: '^GSPC', name: '标普500' },
+                { code: '^IXIC', name: '纳斯达克' },
+                { code: '^HSI', name: '恒生指数' },
+                { code: '^TWII', name: '台湾加权' },
+                { code: 'GC=F', name: '黄金期货' }
+            ]
+        },
+        {
+            key: 'us', title: '美股',
+            symbols: [
+                { code: 'AAPL', name: '苹果' },
+                { code: 'MSFT', name: '微软' },
+                { code: 'NVDA', name: '英伟达' },
+                { code: 'TSLA', name: '特斯拉' },
+                { code: 'GOOGL', name: '谷歌' },
+                { code: 'AMZN', name: '亚马逊' }
+            ]
+        },
+        {
+            key: 'hk', title: '港股',
+            symbols: [
+                { code: '0700.HK', name: '腾讯控股' },
+                { code: '9988.HK', name: '阿里巴巴' },
+                { code: '3690.HK', name: '美团' },
+                { code: '1810.HK', name: '小米集团' },
+                { code: '9618.HK', name: '京东集团' },
+                { code: '0005.HK', name: '汇丰控股' }
+            ]
+        },
+        {
+            key: 'tw', title: '台股',
+            symbols: [
+                { code: '2330.TW', name: '台积电' },
+                { code: '2317.TW', name: '鸿海' },
+                { code: '2454.TW', name: '联发科' },
+                { code: '2308.TW', name: '台达电' },
+                { code: '2881.TW', name: '富邦金' },
+                { code: '2303.TW', name: '联电' }
+            ]
+        }
+    ];
+
+    var allQuoteData = {};
+    var klineData = {};
+    var moduleKlineMap = {};
+    var initialized = false;
+
+    function pickRandom(arr, n) {
+        var shuffled = arr.slice().sort(function() { return Math.random() - 0.5; });
+        return shuffled.slice(0, n);
+    }
+
+    MODULES.forEach(function(mod) {
+        moduleKlineMap[mod.key] = pickRandom(mod.symbols, 2);
+    });
+
+    // 绘制K线图 - 右侧留白防止圆点被裁切
+    function drawChart(canvas, prices, isUp) {
+        if (!prices || prices.length < 2) return;
+        var ctx = canvas.getContext('2d');
+        var dpr = window.devicePixelRatio || 1;
+        var w = canvas.clientWidth;
+        var h = canvas.clientHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.scale(dpr, dpr);
+
+        var padRight = 8;
+        var padTop = 4;
+        var drawW = w - padRight;
+        var drawH = h - padTop * 2;
+        var min = Math.min.apply(null, prices);
+        var max = Math.max.apply(null, prices);
+        var range = max - min || 1;
+        var stepX = drawW / (prices.length - 1);
+
+        // 面积填充
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        for (var i = 0; i < prices.length; i++) {
+            var x = i * stepX;
+            var y = padTop + drawH - ((prices[i] - min) / range) * drawH;
+            ctx.lineTo(x, y);
+        }
+        ctx.lineTo((prices.length - 1) * stepX, h);
+        ctx.closePath();
+        var grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, isUp ? 'rgba(231,76,60,0.10)' : 'rgba(39,174,96,0.10)');
+        grad.addColorStop(1, isUp ? 'rgba(231,76,60,0)' : 'rgba(39,174,96,0)');
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // 线条
+        ctx.beginPath();
+        for (var i = 0; i < prices.length; i++) {
+            var x = i * stepX;
+            var y = padTop + drawH - ((prices[i] - min) / range) * drawH;
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = isUp ? '#e74c3c' : '#27ae60';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 最新价圆点 - 外圈光晕 + 实心点
+        var lastX = (prices.length - 1) * stepX;
+        var lastY = padTop + drawH - ((prices[prices.length - 1] - min) / range) * drawH;
+        var color = isUp ? '#e74c3c' : '#27ae60';
+
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 6, 0, Math.PI * 2);
+        ctx.fillStyle = isUp ? 'rgba(231,76,60,0.2)' : 'rgba(39,174,96,0.2)';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 3, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function formatPrice(val) {
+        if (val === undefined || val === null) return '--';
+        var abs = Math.abs(val);
+        if (abs >= 10000) return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (abs >= 1) return val.toFixed(2);
+        return val.toFixed(4);
+    }
+
+    function buildHTML() {
+        var container = document.getElementById('mqContainer');
+        var html = '';
+        MODULES.forEach(function(mod) {
+            var klineSymbols = moduleKlineMap[mod.key];
+            html += '<div class="mq-module">';
+            html += '<div class="mq-module-title">' + mod.title + '</div>';
+            html += '<div class="mq-kline-cards">';
+            klineSymbols.forEach(function(sym, idx) {
+                var id = mod.key + '-' + idx;
+                html += '<div class="mq-kline-card">';
+                html += '  <div class="mq-kline-header"><div>';
+                html += '    <div class="mq-kline-name">' + sym.name + '</div>';
+                html += '    <div class="mq-kline-sub">' + sym.code + '</div>';
+                html += '  </div>';
+                html += '  <span class="mq-kline-pct" id="mqPct-' + id + '">--</span></div>';
+                html += '  <div class="mq-kline-price" id="mqPrice-' + id + '">--</div>';
+                html += '  <div class="mq-kline-change" id="mqChange-' + id + '">--</div>';
+                html += '  <div class="mq-kline-chart-wrap"><canvas class="mq-kline-chart" id="mqChart-' + id + '"></canvas></div>';
+                html += '</div>';
+            });
+            html += '</div>';
+            html += '<table class="mq-table"><thead><tr>';
+            html += '<th style="text-align:left">名称</th><th>最新价</th><th>涨跌额</th><th>涨跌幅</th>';
+            html += '</tr></thead><tbody id="mqBody-' + mod.key + '">';
+            html += '<tr><td colspan="4" class="mq-loading">加载中...</td></tr>';
+            html += '</tbody></table>';
+            html += '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    function updateKlineCard(modKey, idx, quote, prices) {
+        var id = modKey + '-' + idx;
+        if (!quote) return;
+        var isUp = quote.change >= 0;
+        var cls = isUp ? 'up' : 'down';
+        var sign = isUp ? '+' : '';
+
+        var priceEl = document.getElementById('mqPrice-' + id);
+        var pctEl = document.getElementById('mqPct-' + id);
+        var changeEl = document.getElementById('mqChange-' + id);
+        var canvas = document.getElementById('mqChart-' + id);
+
+        if (priceEl) { priceEl.textContent = formatPrice(quote.price); priceEl.className = 'mq-kline-price ' + cls; }
+        if (pctEl) { pctEl.textContent = sign + quote.changePct.toFixed(2) + '%'; pctEl.className = 'mq-kline-pct ' + cls; }
+        if (changeEl) { changeEl.textContent = sign + formatPrice(quote.change); }
+        if (canvas && prices && prices.length > 1) { drawChart(canvas, prices, isUp); }
+    }
+
+    function renderTable(modKey, symbols) {
+        var tbody = document.getElementById('mqBody-' + modKey);
+        if (!tbody) return;
+        var html = '';
+        symbols.forEach(function(sym) {
+            var quote = allQuoteData[sym.code];
+            if (!quote) {
+                html += '<tr><td><span class="mq-name">' + sym.name + '</span><span class="mq-code">' + sym.code + '</span></td>';
+                html += '<td class="mq-flat">--</td><td class="mq-flat">--</td><td><span class="mq-pct-badge flat">--</span></td></tr>';
+                return;
+            }
+            var isUp = quote.change > 0;
+            var cls = isUp ? 'up' : (quote.change < 0 ? 'down' : 'flat');
+            var sign = isUp ? '+' : '';
+            html += '<tr>';
+            html += '<td><span class="mq-name">' + sym.name + '</span><span class="mq-code">' + sym.code + '</span></td>';
+            html += '<td class="mq-' + cls + '" style="font-weight:500">' + formatPrice(quote.price) + '</td>';
+            html += '<td class="mq-' + cls + '">' + sign + formatPrice(quote.change) + '</td>';
+            html += '<td><span class="mq-pct-badge ' + cls + '">' + sign + quote.changePct.toFixed(2) + '%</span></td>';
+            html += '</tr>';
+        });
+        tbody.innerHTML = html || '<tr><td colspan="4" class="mq-loading">暂无数据</td></tr>';
+    }
+
+    function renderAll() {
+        MODULES.forEach(function(mod) {
+            renderTable(mod.key, mod.symbols);
+            moduleKlineMap[mod.key].forEach(function(sym, idx) {
+                updateKlineCard(mod.key, idx, allQuoteData[sym.code], klineData[sym.code]);
+            });
+        });
+    }
+
+    // 首次完整加载（行情 + K线）
+    async function loadFull() {
+        var allSymbols = [];
+        MODULES.forEach(function(mod) {
+            mod.symbols.forEach(function(s) { if (allSymbols.indexOf(s.code) === -1) allSymbols.push(s.code); });
+        });
+        try {
+            var res = await fetch('/api/market-quotes-v2?symbols=' + encodeURIComponent(allSymbols.join(',')));
+            var json = await res.json();
+            if (json.code === 200 && json.data) {
+                allQuoteData = json.data;
+                initialized = true;
+                renderAll();
+                document.getElementById('mqUpdateTime').textContent = '更新: ' + new Date().toLocaleTimeString();
+            }
+        } catch(e) { console.error('行情获取失败:', e); }
+    }
+
+    // 轻量更新：只获取最新价格，更新图表最后一个点（跟首页逻辑一致）
+    async function updatePrices() {
+        if (!initialized) return;
+        var allSymbols = [];
+        MODULES.forEach(function(mod) {
+            mod.symbols.forEach(function(s) { if (allSymbols.indexOf(s.code) === -1) allSymbols.push(s.code); });
+        });
+        try {
+            var res = await fetch('/api/market-quotes-v2?symbols=' + encodeURIComponent(allSymbols.join(',')));
+            var json = await res.json();
+            if (json.code === 200 && json.data) {
+                // 更新价格数据
+                Object.keys(json.data).forEach(function(symbol) {
+                    var newQuote = json.data[symbol];
+                    if (!newQuote) return;
+                    allQuoteData[symbol] = newQuote;
+
+                    // 更新K线图表最后一个点
+                    if (klineData[symbol] && klineData[symbol].length > 0) {
+                        klineData[symbol][klineData[symbol].length - 1] = newQuote.price;
+                    }
+                });
+                renderAll();
+                document.getElementById('mqUpdateTime').textContent = '更新: ' + new Date().toLocaleTimeString();
+            }
+        } catch(e) {}
+    }
+
+    // 加载K线数据
+    async function loadKlines() {
+        var symbols = [];
+        MODULES.forEach(function(mod) {
+            moduleKlineMap[mod.key].forEach(function(sym) {
+                if (symbols.indexOf(sym.code) === -1) symbols.push(sym.code);
+            });
+        });
+        for (var i = 0; i < symbols.length; i++) {
+            try {
+                var res = await fetch('/api/market-kline?symbol=' + encodeURIComponent(symbols[i]));
+                var json = await res.json();
+                if (json.code === 200 && json.data) { klineData[symbols[i]] = json.data; }
+            } catch(e) {}
+        }
+        renderAll();
+    }
+
+    document.getElementById('mqRefresh').addEventListener('click', function() { loadFull(); loadKlines(); });
+
+    // 初始化
+    buildHTML();
+    loadFull();
+    loadKlines();
+
+    // 每10秒轻量更新价格 + 图表最后一点
+    setInterval(updatePrices, 10000);
+    // 每5分钟完整刷新K线数据
+    setInterval(loadKlines, 300000);
+})();
+</script>

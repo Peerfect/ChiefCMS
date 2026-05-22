@@ -5,6 +5,7 @@ import tag from "../../cms/service/tag.js";
 import friendlink from "../../cms/service/friendlink.js";
 import article from "../../cms/service/article.js";
 import Api from "../service/Api.js";
+import MarketQuotes from "../service/MarketQuotes.js";
 import svgCaptcha from "svg-captcha";
 
 const { tree } = helper;
@@ -284,6 +285,41 @@ class ApiController extends Controller {
       });
       res.type('svg');
       res.send(captcha.data);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * @description 获取行情数据（港股/美股/台股/指数）
+   * @param {string} symbols - 逗号分隔的股票代码
+   */
+  async marketQuotesV2(req, res, next) {
+    try {
+      const { symbols } = req.query;
+      if (!symbols) {
+        return res.json({ code: 400, msg: 'symbols参数不能为空' });
+      }
+      const symbolList = symbols.split(',').slice(0, 20); // 最多20个
+      const data = await MarketQuotes.getQuotes(symbolList);
+      res.json({ code: 200, msg: 'success', data });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * @description 获取K线数据（5天分钟线，用于迷你图表）
+   * @param {string} symbol - 股票代码
+   */
+  async marketKline(req, res, next) {
+    try {
+      const { symbol } = req.query;
+      if (!symbol) {
+        return res.json({ code: 400, msg: 'symbol参数不能为空' });
+      }
+      const data = await MarketQuotes.getKline(symbol);
+      res.json({ code: 200, msg: 'success', data });
     } catch (error) {
       next(error);
     }

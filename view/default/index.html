@@ -138,8 +138,8 @@
                     </div>
                 </div>
                 <div class="index-top-right">
-                    <div class="sidebar-title">推荐文章</div>
-                    <ul class="sidebar-recommend">
+                    <div class="sidebar-title">美股资讯</div>
+                    <ul class="sidebar-recommend" id="usStockNews">
                         {{each recommend}}
                         <li>
                             <a href="{{$value.path}}/article-{{$value.id}}.html" title="{{$value.title}}">{{$value.title}}</a>
@@ -301,6 +301,32 @@
     {{include './common/wap-nav.html'}}
     {{include './common/js.html'}}
 
+    <script>
+    // 加载美股资讯最新文章
+    (function() {
+        fetch('/api/getArticleListByCid?cid=25&len=10')
+            .then(function(res) { return res.json(); })
+            .then(function(json) {
+                var list = null;
+                // 兼容不同返回格式
+                if (json.code === 200 && json.data) {
+                    list = Array.isArray(json.data) ? json.data : (json.data.list || null);
+                } else if (Array.isArray(json)) {
+                    list = json;
+                }
+                if (list && list.length > 0) {
+                    var ul = document.getElementById('usStockNews');
+                    var html = '';
+                    list.forEach(function(item) {
+                        var path = item.path || '/mg';
+                        html += '<li><a href="' + path + '/article-' + item.id + '.html" title="' + item.title + '">' + item.title + '</a></li>';
+                    });
+                    ul.innerHTML = html;
+                }
+            })
+            .catch(function(e) { console.error('美股资讯加载失败:', e); });
+    })();
+    </script>
 </body>
 
 </html>

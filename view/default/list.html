@@ -37,54 +37,7 @@
                     <!-- 实时栏目：左右布局 -->
                     <div class="realtime-layout">
                         <div class="realtime-left">
-                            <div style="padding-top:0;padding-bottom:12px;margin-bottom:0;border-top:1px solid #e0e0e0;position:relative;">
-                                <span style="position:absolute;top:-1.5px;left:0;width:40px;height:2px;background-color:#6d6de6;display:block;"></span>
-                                <h3 style="font-size:16px;font-weight:bold;color:#333;margin-top:10px;">热门行情</h3>
-                            </div>
-                            <div style="height:550px;overflow:hidden;margin-bottom:-30px;">
-                                <div class="tradingview-widget-container">
-                                    <div class="tradingview-widget-container__widget"></div>
-                                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
-                                    {
-                                        "width": "100%",
-                                        "height": "550",
-                                        "symbolsGroups": [
-                                            {
-                                                "name": "外汇",
-                                                "symbols": [
-                                                    {"name": "FX:USDJPY", "displayName": "美元/日元"},
-                                                    {"name": "FX:EURUSD", "displayName": "欧元/美元"},
-                                                    {"name": "FX:GBPUSD", "displayName": "英镑/美元"},
-                                                    {"name": "FX_IDC:USDCNH", "displayName": "美元/离岸人民币"}
-                                                ]
-                                            },
-                                            {
-                                                "name": "指数",
-                                                "symbols": [
-                                                    {"name": "FOREXCOM:SPXUSD", "displayName": "标普500"},
-                                                    {"name": "FOREXCOM:DJI", "displayName": "道琼斯"},
-                                                    {"name": "FOREXCOM:NSXUSD", "displayName": "纳斯达克"},
-                                                    {"name": "TVC:DXY", "displayName": "美元指数"}
-                                                ]
-                                            },
-                                            {
-                                                "name": "商品",
-                                                "symbols": [
-                                                    {"name": "TVC:GOLD", "displayName": "黄金"},
-                                                    {"name": "TVC:SILVER", "displayName": "白银"},
-                                                    {"name": "TVC:USOIL", "displayName": "WTI原油"},
-                                                    {"name": "TVC:UKOIL", "displayName": "布伦特原油"}
-                                                ]
-                                            }
-                                        ],
-                                        "showSymbolLogo": true,
-                                        "isTransparent": true,
-                                        "colorTheme": "light",
-                                        "locale": "zh_CN"
-                                    }
-                                    </script>
-                                </div>
-                            </div>
+                            {{include './common/market-quotes.html'}}
                         </div>
                         <div class="realtime-right">
                             {{include './common/flash-news.html'}}
@@ -92,9 +45,13 @@
                     </div>
 
                     <style>
-                    .realtime-layout { display: flex; gap: 20px; padding-top: 20px; }
-                    .realtime-left { width: 55%; flex-shrink: 0; }
-                    .realtime-right { flex: 1; }
+                    .realtime-layout { display: flex; gap: 20px; padding-top: 20px; align-items: stretch; }
+                    .realtime-left { width: 55%; flex-shrink: 0; display:flex; flex-direction:column; }
+                    .realtime-right { flex: 1; display:flex; flex-direction:column; }
+                    .realtime-left .market-quotes-widget { flex:1; display:flex; flex-direction:column; }
+                    .realtime-left #mqContainer { flex:1; overflow-y:auto; }
+                    .realtime-right .flash-news-section { flex:1; display:flex; flex-direction:column; }
+                    .realtime-right .flash-news-list { flex:1; overflow-y:auto; max-height:none; }
                     </style>
                     {{else}}
                     {{if articleList.list.length>0}}
