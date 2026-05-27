@@ -6,6 +6,9 @@ import friendlink from "../../cms/service/friendlink.js";
 import article from "../../cms/service/article.js";
 import Api from "../service/Api.js";
 import MarketQuotes from "../service/MarketQuotes.js";
+import ForexBroker from "../service/ForexBroker.js";
+import ForexArticle from "../service/ForexArticle.js";
+import ForexSync from "../service/ForexSync.js";
 import svgCaptcha from "svg-captcha";
 
 const { tree } = helper;
@@ -320,6 +323,76 @@ class ApiController extends Controller {
       }
       const data = await MarketQuotes.getKline(symbol);
       res.json({ code: 200, msg: 'success', data });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * @description 获取外汇经纪商列表（CMS文章优先 + chiefrich.com抓取数据）
+   * @param {string} status - 状态筛选：all/监管中/未经认证/问题平台/疑似套牌/超限经营/暂无监管
+   * @param {number} page - 页码
+   * @param {number} pageSize - 每页条数
+   * @param {number} cid - CMS栏目ID（外汇经纪商栏目，可选）
+   */
+  async forexBrokers(req, res, next) {
+    try {
+      const { status = "all", page = 1, pageSize = 20, cid } = req.query;
+      const data = await ForexBroker.getBrokerList({
+        status,
+        page: parseInt(page),
+        pageSize: parseInt(pageSize),
+        cid: cid ? parseInt(cid) : undefined,
+      });
+      res.json({ code: 200, msg: 'success', data });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * @description 获取外汇开户文章列表（CMS文章优先 + chiefrich.com抓取数据）
+   * @param {number} page - 页码
+   * @param {number} pageSize - 每页条数
+   * @param {number} cid - CMS栏目ID（可选）
+   */
+  async forexArticles(req, res, next) {
+    try {
+      const { page = 1, pageSize = 12, cid } = req.query;
+      const data = await ForexArticle.getArticleList({
+        page: parseInt(page),
+        pageSize: parseInt(pageSize),
+        cid: cid ? parseInt(cid) : undefined,
+      });
+      res.json({ code: 200, msg: 'success', data });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * @description 同步外汇数据到文章表
+   * @param {string} type - 同步类型：broker（经纪商）/ article（开户文章）
+   * @param {number} cid - 目标栏目ID
+   * @param {boolean} force - 是否强制同步
+   */
+  async forexSync(req, res, next) {
+    try {
+      const { type, cid, force } = req.query;
+      if (!type || !cid) {
+        return res.json({ code: 400, msg: '缺少 type 或 cid 参数' });
+      }
+
+      let data;
+      if (type === 'broker') {
+        data = await ForexSync.syncBrokers(parseInt(cid), force === 'true');
+      } else if (type === 'article') {
+        data = await ForexSync.syncArticles(parseInt(cid), force === 'true');
+      } else {
+        return res.json({ code: 400, msg: 'type 参数无效，可选: broker, article' });
+      }
+
+      res.json({ code: 200, msg: data.msg, data });
     } catch (error) {
       next(error);
     }

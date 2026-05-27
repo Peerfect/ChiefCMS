@@ -1,5 +1,6 @@
 import { helper } from "chanjs";
 import { singleUpload, multiUpload, logo } from "../../common/upload.js";
+import ForexSync from "./service/ForexSync.js";
 
 export default async (app, router, config) => {
   let controller = await helper.loadController("api");
@@ -29,4 +30,22 @@ export default async (app, router, config) => {
   // 行情数据
   router.get("/market-quotes-v2", controller.Api.marketQuotesV2);
   router.get("/market-kline", controller.Api.marketKline);
+  
+  // 外汇经纪商数据
+  router.get("/forex-brokers", controller.Api.forexBrokers);
+  
+  // 外汇开户文章数据
+  router.get("/forex-articles", controller.Api.forexArticles);
+  
+  // 外汇数据同步（抓取入库）
+  router.get("/forex-sync", controller.Api.forexSync);
+
+  // 启动时自动同步外汇开户文章数据（cid=19），一天一次
+  setTimeout(() => {
+    ForexSync.syncArticles(19).then((res) => {
+      console.log("[ForexSync] 外汇开户自动同步:", res.msg);
+    }).catch((err) => {
+      console.error("[ForexSync] 外汇开户自动同步失败:", err.message);
+    });
+  }, 5000);
 };

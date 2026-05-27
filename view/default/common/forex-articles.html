@@ -1,0 +1,171 @@
+<!-- 外汇开户文章列表 -->
+<div class="forex-article-widget" id="faWidget">
+    <!-- 文章列表 -->
+    <ul class="fa-list" id="faList">
+        <li class="fa-loading">加载中...</li>
+    </ul>
+    <!-- 分页 -->
+    <div class="fa-pagination" id="faPagination"></div>
+</div>
+
+<style>
+.forex-article-widget { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+.fa-list { list-style:none; padding:0; margin:0; min-height:200px; }
+
+.fa-item { display:flex; padding:20px 0; border-bottom:1px dashed #e8e8e8; }
+.fa-item:last-child { border-bottom:none; }
+
+.fa-thumb { width:200px; height:130px; border-radius:4px; overflow:hidden; margin-right:20px; flex-shrink:0; }
+.fa-thumb img { width:100%; height:100%; object-fit:cover; }
+
+.fa-content { flex:1; min-width:0; }
+
+.fa-title { font-size:18px; font-weight:bold; color:#141414; line-height:1.4; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.fa-title a { color:#141414; text-decoration:none; transition:color .2s; }
+.fa-title a:hover { color:#6d6de6; }
+
+.fa-meta { font-size:12px; color:#bfbfbf; margin-bottom:8px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.fa-meta span { margin-right:12px; }
+
+.fa-desc { font-size:14px; color:#595959; line-height:1.7; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.fa-desc a { color:#595959; text-decoration:none; }
+.fa-desc a:hover { color:#6d6de6; }
+
+.fa-badge { display:inline-block; padding:1px 6px; background:#6d6de6; color:#fff; font-size:10px; border-radius:3px; margin-right:6px; vertical-align:middle; }
+
+.fa-loading { text-align:center; color:#999; padding:40px 0; font-size:13px; list-style:none; }
+
+.fa-pagination { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:15px; padding:10px 0; }
+.fa-page-btn { padding:4px 10px; border:1px solid #e0e0e0; border-radius:4px; font-size:12px; color:#666; cursor:pointer; transition:all .2s; }
+.fa-page-btn:hover { border-color:#6d6de6; color:#6d6de6; }
+.fa-page-btn.active { background:#6d6de6; color:#fff; border-color:#6d6de6; }
+.fa-page-btn.disabled { color:#ccc; cursor:not-allowed; border-color:#eee; }
+.fa-page-info { font-size:12px; color:#999; margin:0 8px; }
+
+@media (max-width: 768px) {
+    .fa-thumb { width:120px; height:80px; }
+    .fa-title { font-size:15px; }
+    .fa-desc { -webkit-line-clamp:2; font-size:13px; }
+}
+</style>
+
+<script>
+(function() {
+    var currentPage = 1;
+    var pageSize = 12;
+    var totalPages = 1;
+    var articleCid = window.__forexArticleCid || '';
+
+    function renderList(data) {
+        var container = document.getElementById('faList');
+        if (!data || !data.list || data.list.length === 0) {
+            container.innerHTML = '<li class="fa-loading">暂无数据</li>';
+            return;
+        }
+
+        var html = '';
+        data.list.forEach(function(item) {
+            var isCms = item.source === 'cms';
+            var target = item.url && item.url.startsWith('http') ? ' target="_blank" rel="noopener"' : '';
+            var href = item.url || '#';
+
+            html += '<li class="fa-item">';
+
+            // 缩略图
+            if (item.img) {
+                html += '<div class="fa-thumb"><img src="' + item.img + '" alt="' + item.title + '"></div>';
+            }
+
+            html += '<div class="fa-content">';
+
+            // 标题
+            html += '<h3 class="fa-title"><a href="' + href + '"' + target + '>';
+            if (isCms) {
+                html += '<span class="fa-badge">荐</span>';
+            }
+            html += item.title + '</a></h3>';
+
+            // 元信息：来源 + 标签 + 时间
+            html += '<p class="fa-meta">';
+            html += '<span>文章来源：' + (item.author || '网络') + '</span>';
+            if (item.tag) {
+                html += '<span>标签：' + item.tag + '</span>';
+            }
+            if (item.date) {
+                html += '<span>发布时间：' + item.date + '</span>';
+            }
+            html += '</p>';
+
+            // 描述
+            if (item.description) {
+                html += '<p class="fa-desc"><a href="' + href + '"' + target + '>' + item.description + '</a></p>';
+            }
+
+            html += '</div>';
+            html += '</li>';
+        });
+        container.innerHTML = html;
+
+        // 更新分页
+        totalPages = Math.ceil(data.total / data.pageSize);
+        renderPagination(data.current, totalPages, data.total);
+    }
+
+    function renderPagination(current, total, count) {
+        var container = document.getElementById('faPagination');
+        if (total <= 1) {
+            container.innerHTML = '<span class="fa-page-info">共 ' + count + ' 篇</span>';
+            return;
+        }
+
+        var html = '';
+        html += '<span class="fa-page-btn ' + (current <= 1 ? 'disabled' : '') + '" data-page="' + (current - 1) + '">上一页</span>';
+
+        var start = Math.max(1, current - 2);
+        var end = Math.min(total, start + 4);
+        start = Math.max(1, end - 4);
+
+        for (var i = start; i <= end; i++) {
+            html += '<span class="fa-page-btn ' + (i === current ? 'active' : '') + '" data-page="' + i + '">' + i + '</span>';
+        }
+
+        html += '<span class="fa-page-btn ' + (current >= total ? 'disabled' : '') + '" data-page="' + (current + 1) + '">下一页</span>';
+        html += '<span class="fa-page-info">共 ' + count + ' 篇</span>';
+        container.innerHTML = html;
+    }
+
+    async function loadData() {
+        var container = document.getElementById('faList');
+        container.innerHTML = '<li class="fa-loading">加载中...</li>';
+
+        try {
+            var url = '/api/forex-articles?page=' + currentPage + '&pageSize=' + pageSize + (articleCid ? '&cid=' + articleCid : '');
+            var res = await fetch(url);
+            var json = await res.json();
+            if (json.code === 200 && json.data) {
+                renderList(json.data);
+            } else {
+                container.innerHTML = '<li class="fa-loading">加载失败，请稍后重试</li>';
+            }
+        } catch(e) {
+            console.error('外汇开户数据加载失败:', e);
+            container.innerHTML = '<li class="fa-loading">加载失败，请稍后重试</li>';
+        }
+    }
+
+    // 分页点击
+    document.getElementById('faPagination').addEventListener('click', function(e) {
+        var btn = e.target.closest('.fa-page-btn');
+        if (!btn || btn.classList.contains('disabled') || btn.classList.contains('active')) return;
+        var page = parseInt(btn.getAttribute('data-page'));
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            loadData();
+        }
+    });
+
+    // 初始化加载
+    loadData();
+})();
+</script>

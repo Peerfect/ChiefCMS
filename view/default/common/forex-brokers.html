@@ -1,0 +1,234 @@
+<!-- 外汇经纪商行情数据 -->
+<div class="forex-broker-widget" id="fbWidget" data-cid="">
+    <div style="padding-top:0;padding-bottom:12px;margin-bottom:0;border-top:1px solid #e0e0e0;position:relative;">
+        <span style="position:absolute;top:-1.5px;left:0;width:40px;height:2px;background-color:#6d6de6;display:block;"></span>
+        <h3 style="font-size:16px;font-weight:bold;color:#333;margin-top:10px;">外汇行情</h3>
+    </div>
+    <!-- Tab 筛选栏 -->
+    <div class="fb-tabs" id="fbTabs">
+        <span class="fb-tab active" data-status="all">全部</span>
+        <span class="fb-tab" data-status="监管中">监管中</span>
+        <span class="fb-tab" data-status="未经认证">未经认证</span>
+        <span class="fb-tab" data-status="问题平台">问题平台</span>
+        <span class="fb-tab" data-status="疑似套牌">疑似套牌</span>
+        <span class="fb-tab" data-status="超限经营">超限经营</span>
+        <span class="fb-tab" data-status="暂无监管">暂无监管</span>
+    </div>
+    <!-- 列表 -->
+    <div class="fb-list" id="fbList">
+        <div class="fb-loading">加载中...</div>
+    </div>
+    <!-- 分页 -->
+    <div class="fb-pagination" id="fbPagination"></div>
+    <!-- 底部 -->
+    <div class="fb-footer">
+        <span class="fb-source">数据来源：致富财经</span>
+        <span class="fb-refresh" id="fbRefresh">刷新</span>
+    </div>
+</div>
+
+<style>
+.forex-broker-widget { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+.fb-tabs { display:flex; flex-wrap:wrap; gap:8px; margin:15px 0; }
+.fb-tab { padding:5px 12px; border-radius:15px; font-size:12px; color:#666; background:#f5f5f5; cursor:pointer; transition:all .2s; user-select:none; }
+.fb-tab:hover { background:#e8e8ff; color:#6d6de6; }
+.fb-tab.active { background:#6d6de6; color:#fff; }
+
+.fb-list { min-height:200px; }
+
+.fb-item { display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #f5f5f5; transition:background .15s; }
+.fb-item:hover { background:#fafbfc; }
+.fb-item:last-child { border-bottom:none; }
+
+.fb-rank { width:30px; text-align:center; font-size:14px; font-weight:bold; color:#999; flex-shrink:0; }
+.fb-rank.top1 { color:#e74c3c; }
+.fb-rank.top2 { color:#f39c12; }
+.fb-rank.top3 { color:#27ae60; }
+
+.fb-info { flex:1; min-width:0; margin-left:10px; }
+.fb-name { font-size:14px; font-weight:600; color:#333; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.fb-meta { font-size:11px; color:#999; margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; }
+
+.fb-score { width:60px; text-align:center; flex-shrink:0; }
+.fb-score-num { font-size:18px; font-weight:bold; }
+.fb-score-num.high { color:#27ae60; }
+.fb-score-num.mid { color:#f39c12; }
+.fb-score-num.low { color:#e74c3c; }
+.fb-score-label { font-size:10px; color:#bbb; }
+
+.fb-status-badge { display:inline-block; padding:2px 6px; border-radius:3px; font-size:11px; font-weight:500; flex-shrink:0; margin-left:8px; }
+.fb-status-badge.ok { color:#27ae60; background:#f0fdf4; }
+.fb-status-badge.warn { color:#f39c12; background:#fffbf0; }
+.fb-status-badge.danger { color:#e74c3c; background:#fef2f2; }
+.fb-status-badge.unknown { color:#999; background:#f5f5f5; }
+
+.fb-loading { text-align:center; color:#999; padding:40px 0; font-size:13px; }
+
+.fb-item-cms { background:linear-gradient(135deg, #fafbff 0%, #f5f3ff 100%); border-radius:6px; padding:12px 8px; margin-bottom:4px; }
+.fb-rank-cms { width:30px; text-align:center; font-size:11px; font-weight:bold; color:#fff; background:#6d6de6; border-radius:3px; padding:2px 4px; flex-shrink:0; }
+.fb-logo { width:40px; height:25px; object-fit:contain; border:1px solid #eee; border-radius:3px; margin-right:8px; flex-shrink:0; }
+
+.fb-pagination { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:15px; padding:10px 0; }
+.fb-page-btn { padding:4px 10px; border:1px solid #e0e0e0; border-radius:4px; font-size:12px; color:#666; cursor:pointer; transition:all .2s; }
+.fb-page-btn:hover { border-color:#6d6de6; color:#6d6de6; }
+.fb-page-btn.active { background:#6d6de6; color:#fff; border-color:#6d6de6; }
+.fb-page-btn.disabled { color:#ccc; cursor:not-allowed; border-color:#eee; }
+.fb-page-info { font-size:12px; color:#999; margin:0 8px; }
+
+.fb-footer { display:flex; justify-content:space-between; align-items:center; padding:10px 0; font-size:11px; color:#bbb; margin-top:5px; }
+.fb-refresh { color:#6d6de6; cursor:pointer; font-size:12px; }
+.fb-refresh:hover { text-decoration:underline; }
+.fb-source { font-size:11px; color:#bbb; }
+
+@media (max-width: 768px) {
+    .fb-tabs { gap:5px; }
+    .fb-tab { padding:4px 8px; font-size:11px; }
+    .fb-meta { flex-direction:column; gap:2px; }
+}
+</style>
+
+<script>
+(function() {
+    var currentStatus = 'all';
+    var currentPage = 1;
+    var pageSize = 15;
+    var totalPages = 1;
+    // 设置 CMS 栏目ID（外汇经纪商栏目）
+    var brokerCid = (document.getElementById('fbWidget') && document.getElementById('fbWidget').getAttribute('data-cid')) || window.__forexBrokerCid || '';
+
+    function getStatusBadgeClass(status) {
+        if (status === '监管中') return 'ok';
+        if (status === '未经认证' || status === '暂无监管') return 'warn';
+        return 'danger';
+    }
+
+    function getScoreClass(score) {
+        if (score >= 85) return 'high';
+        if (score >= 60) return 'mid';
+        return 'low';
+    }
+
+    function renderList(data) {
+        var container = document.getElementById('fbList');
+        if (!data || !data.list || data.list.length === 0) {
+            container.innerHTML = '<div class="fb-loading">暂无数据</div>';
+            return;
+        }
+
+        var html = '';
+        var startRank = (data.current - 1) * data.pageSize;
+        data.list.forEach(function(item, idx) {
+            var rank = startRank + idx + 1;
+            var rankCls = rank === 1 ? 'top1' : (rank === 2 ? 'top2' : (rank === 3 ? 'top3' : ''));
+            var scoreCls = getScoreClass(item.score);
+            var badgeCls = getStatusBadgeClass(item.status);
+            var isCms = item.source === 'cms';
+
+            html += '<div class="fb-item' + (isCms ? ' fb-item-cms' : '') + '">';
+            if (isCms) {
+                html += '  <div class="fb-rank fb-rank-cms">荐</div>';
+            } else {
+                html += '  <div class="fb-rank ' + rankCls + '">' + rank + '</div>';
+            }
+            html += '  <div class="fb-info">';
+            if (isCms && item.img) {
+                html += '    <img class="fb-logo" src="' + item.img + '" alt="' + item.name + '">';
+            }
+            html += '    <div class="fb-name">' + item.name + '</div>';
+            html += '    <div class="fb-meta">';
+            html += '      <span>' + (item.country || '--') + '</span>';
+            html += '      <span>' + (item.regulation || '--') + '</span>';
+            html += '    </div>';
+            html += '  </div>';
+            html += '  <div class="fb-score">';
+            html += '    <div class="fb-score-num ' + scoreCls + '">' + item.score + '</div>';
+            html += '    <div class="fb-score-label">评分</div>';
+            html += '  </div>';
+            html += '  <span class="fb-status-badge ' + badgeCls + '">' + item.status + '</span>';
+            html += '</div>';
+        });
+        container.innerHTML = html;
+
+        // 更新分页
+        totalPages = Math.ceil(data.total / data.pageSize);
+        renderPagination(data.current, totalPages, data.total);
+    }
+
+    function renderPagination(current, total, count) {
+        var container = document.getElementById('fbPagination');
+        if (total <= 1) {
+            container.innerHTML = '<span class="fb-page-info">共 ' + count + ' 条</span>';
+            return;
+        }
+
+        var html = '';
+        html += '<span class="fb-page-btn ' + (current <= 1 ? 'disabled' : '') + '" data-page="' + (current - 1) + '">上一页</span>';
+
+        // 显示页码（最多5个）
+        var start = Math.max(1, current - 2);
+        var end = Math.min(total, start + 4);
+        start = Math.max(1, end - 4);
+
+        for (var i = start; i <= end; i++) {
+            html += '<span class="fb-page-btn ' + (i === current ? 'active' : '') + '" data-page="' + i + '">' + i + '</span>';
+        }
+
+        html += '<span class="fb-page-btn ' + (current >= total ? 'disabled' : '') + '" data-page="' + (current + 1) + '">下一页</span>';
+        html += '<span class="fb-page-info">共 ' + count + ' 条</span>';
+        container.innerHTML = html;
+    }
+
+    async function loadData() {
+        var container = document.getElementById('fbList');
+        container.innerHTML = '<div class="fb-loading">加载中...</div>';
+
+        try {
+            var url = '/api/forex-brokers?status=' + encodeURIComponent(currentStatus) + '&page=' + currentPage + '&pageSize=' + pageSize + (brokerCid ? '&cid=' + brokerCid : '');
+            var res = await fetch(url);
+            var json = await res.json();
+            if (json.code === 200 && json.data) {
+                renderList(json.data);
+            } else {
+                container.innerHTML = '<div class="fb-loading">加载失败，请稍后重试</div>';
+            }
+        } catch(e) {
+            console.error('外汇数据加载失败:', e);
+            container.innerHTML = '<div class="fb-loading">加载失败，请稍后重试</div>';
+        }
+    }
+
+    // Tab 切换
+    document.getElementById('fbTabs').addEventListener('click', function(e) {
+        var tab = e.target.closest('.fb-tab');
+        if (!tab) return;
+        // 移除所有 active
+        var tabs = this.querySelectorAll('.fb-tab');
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        currentStatus = tab.getAttribute('data-status');
+        currentPage = 1;
+        loadData();
+    });
+
+    // 分页点击
+    document.getElementById('fbPagination').addEventListener('click', function(e) {
+        var btn = e.target.closest('.fb-page-btn');
+        if (!btn || btn.classList.contains('disabled') || btn.classList.contains('active')) return;
+        var page = parseInt(btn.getAttribute('data-page'));
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            loadData();
+        }
+    });
+
+    // 刷新按钮
+    document.getElementById('fbRefresh').addEventListener('click', function() {
+        currentPage = 1;
+        loadData();
+    });
+
+    // 初始化加载
+    loadData();
+})();
+</script>

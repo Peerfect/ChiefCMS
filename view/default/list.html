@@ -53,6 +53,15 @@
                     .realtime-right .flash-news-section { flex:1; display:flex; flex-direction:column; }
                     .realtime-right .flash-news-list { flex:1; overflow-y:auto; max-height:none; }
                     </style>
+                    {{else if cate.pinyin === 'waihui-hangqing' || cate.pinyin === 'hangqing' || cate.pinyin === 'waihuihangqing' || cate.name === '外汇行情'}}
+                    <!-- 外汇行情栏目：经纪商列表 -->
+                    <div style="padding-top:20px;">
+                        <script>
+                        window.__forexBrokerCid = '{{cate.id}}';
+                        console.log('栏目信息:', {name: '{{cate.name}}', pinyin: '{{cate.pinyin}}', id: '{{cate.id}}'});
+                        </script>
+                        {{include './common/forex-brokers.html'}}
+                    </div>
                     {{else}}
                     {{if articleList.list.length>0}}
                     <ul>

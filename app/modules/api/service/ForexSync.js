@@ -1,0 +1,394 @@
+/**
+ * 外汇数据同步服务
+ * 从目标网站抓取数据，存入 cms_article 表对应栏目下
+ * 一天同步一次，CMS 后台手动添加的文章（sort > 0）始终排前面
+ */
+import * as cheerio from "cheerio";
+import { Service } from "chanjs";
+
+class ForexSyncService extends Service {
+  constructor() {
+    super("cms_article");
+    // 同步锁：防止并发执行
+    this.syncing = false;
+    // 缓存上次同步时间
+    this.lastSyncTime = {};
+    this.syncInterval = 24 * 60 * 60 * 1000; // 24小时
+  }
+
+  /**
+   * 同步外汇经纪商数据到文章表
+   * @param {number} cid - 目标栏目ID
+   * @param {boolean} force - 是否强制同步（忽略时间间隔）
+   * @returns {Object} 同步结果
+   */
+  async syncBrokers(cid, force = false) {
+    if (!cid) throw new Error("缺少目标栏目ID");
+
+    // 检查是否需要同步
+    const now = Date.now();
+    if (!force && this.lastSyncTime[`broker_${cid}`] && now - this.lastSyncTime[`broker_${cid}`] < this.syncInterval) {
+      return { success: true, msg: "距上次同步不足24小时，跳过", synced: 0 };
+    }
+
+    if (this.syncing) {
+      return { success: false, msg: "正在同步中，请稍后" };
+    }
+
+    this.syncing = true;
+    try {
+      // 1. 抓取数据
+      const brokers = await this.fetchBrokerList();
+      if (!brokers.length) {
+        return { success: false, msg: "抓取数据为空" };
+      }
+
+      // 2. 获取已存在的抓取文章（source 标记为 scraped）
+      const existing = await this.db("cms_article")
+        .select("id", "title")
+        .where("cid", cid)
+        .where("source", "scraped");
+
+      const existingTitles = new Set(existing.map((a) => a.title));
+
+      // 3. 过滤出新数据
+      const newBrokers = brokers.filter((b) => !existingTitles.has(b.name));
+
+      // 4. 批量插入新数据
+      if (newBrokers.length > 0) {
+        const insertData = newBrokers.map((b) => ({
+          title: b.name,
+          shortTitle: b.status,
+          description: `所属国家：${b.country}，监管：${b.regulation}，综合评分：${b.score}`,
+          author: b.country,
+          content: `所属国家：${b.country}，监管：${b.regulation}，综合评分：${b.score}`,
+          link: b.url,
+          cid: cid,
+          source: "scraped",
+          status: 0,
+          pv: 0,
+          createdAt: new Date(),
+        }));
+
+        // 分批插入（每批20条）
+        for (let i = 0; i < insertData.length; i += 20) {
+          const batch = insertData.slice(i, i + 20);
+          await this.db("cms_article").insert(batch);
+        }
+      }
+
+      this.lastSyncTime[`broker_${cid}`] = now;
+
+      return {
+        success: true,
+        msg: `同步完成，新增 ${newBrokers.length} 条，已存在 ${existingTitles.size} 条`,
+        synced: newBrokers.length,
+        total: brokers.length,
+      };
+    } finally {
+      this.syncing = false;
+    }
+  }
+
+  /**
+   * 同步外汇开户文章数据到文章表
+   * @param {number} cid - 目标栏目ID
+   * @param {boolean} force - 是否强制同步
+   */
+  async syncArticles(cid, force = false) {
+    if (!cid) throw new Error("缺少目标栏目ID");
+
+    const now = Date.now();
+    if (!force && this.lastSyncTime[`article_${cid}`] && now - this.lastSyncTime[`article_${cid}`] < this.syncInterval) {
+      return { success: true, msg: "距上次同步不足24小时，跳过", synced: 0 };
+    }
+
+    if (this.syncing) {
+      return { success: false, msg: "正在同步中，请稍后" };
+    }
+
+    this.syncing = true;
+    try {
+      // 1. 抓取数据
+      const articles = await this.fetchArticleList("https://www.chiefrich.com/waihui/whkh/");
+      if (!articles.length) {
+        return { success: false, msg: "抓取数据为空" };
+      }
+
+      // 2. 获取已存在的抓取文章
+      const existing = await this.db("cms_article")
+        .select("id", "title")
+        .where("cid", cid)
+        .where("source", "scraped");
+
+      const existingTitles = new Set(existing.map((a) => a.title));
+
+      // 3. 过滤出新数据
+      const newArticles = articles.filter((a) => !existingTitles.has(a.title));
+
+      // 4. 批量插入
+      if (newArticles.length > 0) {
+        const insertData = newArticles.map((a) => ({
+          title: a.title,
+          description: a.description || "",
+          img: a.img || "",
+          link: a.url,
+          cid: cid,
+          source: "scraped",
+          content: a.content || a.description || "",
+          status: 0,
+          pv: 0,
+          createdAt: a.date ? new Date(a.date) : new Date(),
+        }));
+
+        for (let i = 0; i < insertData.length; i += 20) {
+          const batch = insertData.slice(i, i + 20);
+          await this.db("cms_article").insert(batch);
+        }
+
+        // 插入扩展表记录（查询栏目关联的模型表）
+        try {
+          const categoryInfo = await this.db("cms_category").select("mid").where("id", cid).first();
+          if (categoryInfo?.mid && categoryInfo.mid !== "0") {
+            const modelInfo = await this.db("cms_model").select("tableName").where("id", categoryInfo.mid).first();
+            if (modelInfo?.tableName) {
+              const newIds = await this.db("cms_article")
+                .select("id", "description")
+                .where("cid", cid)
+                .where("source", "scraped")
+                .orderBy("id", "desc")
+                .limit(newArticles.length);
+              for (const a of newIds) {
+                const exists = await this.db(modelInfo.tableName).where("aid", a.id).first();
+                if (!exists) {
+                  await this.db(modelInfo.tableName).insert({ aid: a.id, summary: a.description || "" });
+                }
+              }
+            }
+          }
+        } catch (extErr) {
+          console.error("[ForexSync] 插入扩展表失败:", extErr.message);
+        }
+      }
+
+      this.lastSyncTime[`article_${cid}`] = now;
+
+      return {
+        success: true,
+        msg: `同步完成，新增 ${newArticles.length} 条，已存在 ${existingTitles.size} 条`,
+        synced: newArticles.length,
+        total: articles.length,
+      };
+    } finally {
+      this.syncing = false;
+    }
+  }
+
+  /**
+   * 抓取经纪商列表
+   */
+  async fetchBrokerList() {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch("https://www.chiefrich.com/broker/", {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml",
+          "Accept-Language": "zh-CN,zh;q=0.9",
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+      if (!response.ok) return [];
+
+      const content = await response.text();
+      if (!content) return [];
+
+      return this.parseBrokerHTML(content);
+    } catch (err) {
+      console.error("[ForexSync] 抓取经纪商失败:", err.message);
+      return [];
+    }
+  }
+
+  /**
+   * 抓取文章列表
+   */
+  async fetchArticleList(url) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml",
+          "Accept-Language": "zh-CN,zh;q=0.9",
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+      if (!response.ok) return [];
+
+      const content = await response.text();
+      if (!content) return [];
+
+      const articles = this.parseArticleHTML(content);
+
+      // 逐个获取文章详情页正文内容
+      for (let i = 0; i < articles.length; i++) {
+        if (articles[i].url) {
+          articles[i].content = await this.fetchArticleContent(articles[i].url);
+          // 避免请求过快
+          if (i < articles.length - 1) {
+            await new Promise((r) => setTimeout(r, 500));
+          }
+        }
+      }
+
+      return articles;
+    } catch (err) {
+      console.error("[ForexSync] 抓取文章失败:", err.message);
+      return [];
+    }
+  }
+
+  /**
+   * 获取文章详情页正文 HTML
+   */
+  async fetchArticleContent(url) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          Accept: "text/html",
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+      if (!response.ok) return "";
+
+      const html = await response.text();
+      const $ = cheerio.load(html);
+      const $content = $(".entry-content");
+
+      // 清除外链：将外部链接域名替换为 chiefrich.com
+      $content.find("a").each((i, el) => {
+        const $a = $(el);
+        const href = $a.attr("href") || "";
+        if (href.startsWith("http") || href.startsWith("//")) {
+          try {
+            const url = new URL(href.startsWith("//") ? "https:" + href : href);
+            url.hostname = "www.chiefrich.com";
+            url.protocol = "https:";
+            $a.attr("href", url.toString());
+          } catch (e) {
+            $a.attr("href", "https://www.chiefrich.com");
+          }
+        }
+      });
+
+      return $content.html() || "";
+    } catch (err) {
+      return "";
+    }
+  }
+
+  /**
+   * 解析经纪商 HTML
+   */
+  parseBrokerHTML(html) {
+    const $ = cheerio.load(html);
+    const brokers = [];
+
+    $('a[href*="/broker/"]').each((index, el) => {
+      const $el = $(el);
+      const text = $el.text().trim();
+      const href = $el.attr("href") || "";
+
+      if (!text.includes("综合评分") || !href.includes("/broker/")) return;
+
+      let status = "";
+      const statusMatch = text.match(/^(监管中|未经认证|问题平台|疑似套牌|超限经营|暂无监管)/);
+      if (statusMatch) status = statusMatch[1];
+
+      let name = "";
+      const afterStatus = text.replace(/^(监管中|未经认证|问题平台|疑似套牌|超限经营|暂无监管)\s*/, "");
+      const nameMatch = afterStatus.match(/^(.+?)\s+综合评分/);
+      if (nameMatch) {
+        let rawName = nameMatch[1].trim();
+        const parts = rawName.split(/\s+/);
+        if (parts.length === 2 && parts[0] === parts[1]) rawName = parts[0];
+        name = rawName;
+      }
+
+      let score = 0;
+      const scoreMatch = text.match(/综合评分[：:]\s*(\d+)/);
+      if (scoreMatch) score = parseInt(scoreMatch[1]);
+
+      let country = "";
+      const countryMatch = text.match(/所属国家[：:]\s*(.+?)\s+监管/);
+      if (countryMatch) country = countryMatch[1].trim();
+
+      let regulation = "";
+      const regMatch = text.match(/监管[：:]\s*(.+?)$/);
+      if (regMatch) regulation = regMatch[1].trim();
+
+      if (name && score > 0) {
+        brokers.push({
+          name, score, status, country, regulation,
+          url: href.startsWith("http") ? href : `https://www.chiefrich.com${href}`,
+        });
+      }
+    });
+
+    return brokers;
+  }
+
+  /**
+   * 解析文章列表 HTML
+   */
+  parseArticleHTML(html) {
+    const $ = cheerio.load(html);
+    const articles = [];
+
+    $(".post").each((index, el) => {
+      const $el = $(el);
+      const $titleLink = $el.find(".entry-title a").first();
+      const title = ($titleLink.attr("title") || $titleLink.text() || "").trim();
+
+      if (!title || title.length < 5) return;
+      if (articles.some((a) => a.title === title)) return;
+
+      const href = $titleLink.attr("href") || "";
+      const url = href.startsWith("http") ? href : `https://www.chiefrich.com${href}`;
+
+      // 缩略图
+      let img = "";
+      const imgSrc = $el.find(".thumbnail-link img").attr("src") || $el.find(".thumbnail-wrap img").attr("src") || "";
+      if (imgSrc) {
+        img = imgSrc.startsWith("http") ? imgSrc : `https://www.chiefrich.com${imgSrc}`;
+      }
+
+      // 描述
+      const description = $el.find(".entry-summary").text().trim().slice(0, 200);
+
+      // 日期
+      const date = $el.find(".entry-date").text().replace(/发布时间[：:]?\s*/, "").trim();
+
+      articles.push({ title, description, img, url, date });
+    });
+
+    return articles;
+  }
+}
+
+export default new ForexSyncService();
