@@ -91,12 +91,21 @@ class ForexSyncService extends Service {
   }
 
   /**
-   * 同步外汇开户文章数据到文章表
+   * 同步文章数据到文章表
    * @param {number} cid - 目标栏目ID
+   * @param {string} url - 来源页面URL（可选，默认根据cid判断）
    * @param {boolean} force - 是否强制同步
    */
-  async syncArticles(cid, force = false) {
+  async syncArticles(cid, force = false, url) {
     if (!cid) throw new Error("缺少目标栏目ID");
+
+    // 默认URL映射
+    const urlMap = {
+      19: "https://www.chiefrich.com/waihui/whkh/",
+      20: "https://www.chiefrich.com/waihui/whjycn/",
+    };
+    const sourceUrl = url || urlMap[cid] || "";
+    if (!sourceUrl) throw new Error("缺少来源URL");
 
     const now = Date.now();
     if (!force && this.lastSyncTime[`article_${cid}`] && now - this.lastSyncTime[`article_${cid}`] < this.syncInterval) {
@@ -110,7 +119,7 @@ class ForexSyncService extends Service {
     this.syncing = true;
     try {
       // 1. 抓取数据
-      const articles = await this.fetchArticleList("https://www.chiefrich.com/waihui/whkh/");
+      const articles = await this.fetchArticleList(sourceUrl);
       if (!articles.length) {
         return { success: false, msg: "抓取数据为空" };
       }
@@ -178,6 +187,83 @@ class ForexSyncService extends Service {
         msg: `同步完成，新增 ${newArticles.length} 条，已存在 ${existingTitles.size} 条`,
         synced: newArticles.length,
         total: articles.length,
+      };
+    } finally {
+      this.syncing = false;
+    }
+  }
+
+  /**
+   * 从多个页面同步文章到同一个栏目
+   * @param {number} cid - 目标栏目ID
+   * @param {string[]} urls - 来源页面URL数组
+   * @param {boolean} force - 是否强制同步
+   */
+  async syncMultiplePages(cid, urls, force = false) {
+    if (!cid) throw new Error("缺少目标栏目ID");
+
+    const now = Date.now();
+    const cacheKey = `multi_${cid}`;
+    if (!force && this.lastSyncTime[cacheKey] && now - this.lastSyncTime[cacheKey] < this.syncInterval) {
+      return { success: true, msg: "距上次同步不足24小时，跳过", synced: 0 };
+    }
+
+    if (this.syncing) {
+      return { success: false, msg: "正在同步中，请稍后" };
+    }
+
+    this.syncing = true;
+    try {
+      // 1. 从所有页面抓取文章列表
+      let allArticles = [];
+      for (const url of urls) {
+        const articles = await this.fetchArticleList(url);
+        for (const a of articles) {
+          if (!allArticles.some((x) => x.title === a.title)) {
+            allArticles.push(a);
+          }
+        }
+        await new Promise((r) => setTimeout(r, 500));
+      }
+
+      if (!allArticles.length) {
+        return { success: false, msg: "抓取数据为空" };
+      }
+
+      // 2. 获取已存在的抓取文章
+      const existing = await this.db("cms_article")
+        .select("id", "title")
+        .where("cid", cid)
+        .where("source", "scraped");
+      const existingTitles = new Set(existing.map((a) => a.title));
+
+      // 3. 过滤新数据
+      const newArticles = allArticles.filter((a) => !existingTitles.has(a.title));
+
+      // 4. 批量插入
+      if (newArticles.length > 0) {
+        for (const a of newArticles) {
+          await this.db("cms_article").insert({
+            title: a.title,
+            description: a.description || "",
+            img: a.img || "",
+            link: a.url,
+            cid: cid,
+            source: "scraped",
+            content: a.content || a.description || "",
+            status: 0,
+            pv: 0,
+            createdAt: a.date ? new Date(a.date) : new Date(),
+          });
+        }
+      }
+
+      this.lastSyncTime[cacheKey] = now;
+      return {
+        success: true,
+        msg: `同步完成，新增 ${newArticles.length} 条，已存在 ${existingTitles.size} 条，总抓取 ${allArticles.length} 条`,
+        synced: newArticles.length,
+        total: allArticles.length,
       };
     } finally {
       this.syncing = false;
@@ -280,19 +366,32 @@ class ForexSyncService extends Service {
       const $ = cheerio.load(html);
       const $content = $(".entry-content");
 
-      // 清除外链：将外部链接域名替换为 chiefrich.com
+      // 外链域名替换为 chiefrich.com
       $content.find("a").each((i, el) => {
         const $a = $(el);
         const href = $a.attr("href") || "";
         if (href.startsWith("http") || href.startsWith("//")) {
           try {
-            const url = new URL(href.startsWith("//") ? "https:" + href : href);
-            url.hostname = "www.chiefrich.com";
-            url.protocol = "https:";
-            $a.attr("href", url.toString());
+            const u = new URL(href.startsWith("//") ? "https:" + href : href);
+            u.hostname = "www.chiefrich.com";
+            u.protocol = "https:";
+            $a.attr("href", u.toString());
           } catch (e) {
             $a.attr("href", "https://www.chiefrich.com");
           }
+        }
+      });
+
+      // 图片相对路径补全为绝对路径
+      $content.find("img").each((i, el) => {
+        const $img = $(el);
+        const src = $img.attr("src") || "";
+        if (src && !src.startsWith("http") && !src.startsWith("data:")) {
+          $img.attr("src", `https://www.chiefrich.com${src.startsWith("/") ? "" : "/"}${src}`);
+        }
+        const dataSrc = $img.attr("data-src") || "";
+        if (dataSrc && !dataSrc.startsWith("http") && !dataSrc.startsWith("data:")) {
+          $img.attr("data-src", `https://www.chiefrich.com${dataSrc.startsWith("/") ? "" : "/"}${dataSrc}`);
         }
       });
 

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="{{cate.seoDescription || site.description}}">
+    <meta name="keywords" content="{{cate.seoKeywords || site.keywords}}" />
+    <meta property="og:title" content="{{cate.seoTitle || cate.name}}-{{site.name}}" />
+    <meta property="og:description" content="{{site.description}}" />
+    <title>{{cate.seoTitle || cate.name}}-{{site.name}}</title>
+    {{include './common/meta.html'}}
+    <style>
+    .expose-layout { display:flex; gap:20px; }
+    .expose-main { flex:1; min-width:0; }
+    .expose-sidebar { width:300px; flex-shrink:0; }
+    .expose-sidebar-inner { position:sticky; top:80px; }
+    .expose-ad-banner { display:block; margin-bottom:20px; text-decoration:none; border-radius:6px; overflow:hidden; }
+    .expose-ad-box { background:#000; padding:30px 25px; text-align:center; }
+    .expose-ad-line1 { font-size:20px; font-weight:bold; color:#fff; margin-bottom:15px; }
+    .expose-ad-line2 { font-size:26px; font-weight:bold; color:#e74c3c; margin-bottom:15px; }
+    .expose-ad-line3 span { display:inline-block; background:#e74c3c; color:#fff; font-size:20px; font-weight:bold; padding:8px 20px; }
+    .expose-ad-banner:hover .expose-ad-box { background:#111; }
+    .expose-cate-box { background:#fff; border-radius:6px; padding:20px; }
+    .expose-cate-title { font-size:14px; color:#666; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid #eee; }
+    .expose-cate-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .expose-cate-item { display:block; padding:8px 12px; text-align:center; background:#f8f8f8; border-radius:4px; font-size:13px; color:#333; text-decoration:none; transition:all .2s; }
+    .expose-cate-item:hover { background:#6d6de6; color:#fff; }
+    @media (max-width:768px) {
+        .expose-layout { flex-direction:column; }
+        .expose-sidebar { width:100%; }
+    }
+    </style>
+</head>
+
+<body class="bg-f8f8f8">
+    {{include './common/header.html'}}
+
+    <main class="pt-20 pb-20 flex">
+        <div class="main center">
+            <div class="bg-fff pd-15 mb-1 f-14 c-999 radius-6">
+                <i class="ico-20 ico-home pos-r t-3"></i>
+                <a href="/">首页</a> /
+                {{each position}}
+                {{if $index < position.length-1}} <a href="{{$value.path}}/index.html">{{$value.name}}</a> /
+                    {{else}}
+                    <a class="c-666" href="{{$value.path}}/index.html">{{$value.name}}</a>
+                    {{/if}}
+                    {{/each}}
+            </div>
+
+            <div class="expose-layout">
+                <!-- 左侧：文章列表 -->
+                <div class="expose-main">
+                    <div class="bg-fff pl-25 pr-25 pb-25 radius-6 list">
+                        {{if articleList.list.length>0}}
+                        <ul>
+                            {{each articleList.list}}
+                            <li class="flex border-dashed pt-20 pb-20">
+                                <figure class="flex justify-between mt-10">
+                                    {{if $value.img}}
+                                    <div class="thumb-120 mb-10">
+                                        <img class="w-p100" src="{{$value.img}}" alt="{{$value.title}}" title="{{$value.title}}">
+                                    </div>
+                                    {{/if}}
+                                    <div class="flex-1">
+                                        <h3 class="f-18 ellips-2 bold mt-4 c-141414">
+                                            <a href="{{$value.path}}/article-{{$value.id}}.html" title="{{$value.title}}">{{$value.title}}</a>
+                                        </h3>
+                                        <p class="f-12 c-bfbfbf mb-8">
+                                            <i class="ico-20 ico-time pos-r t-4"></i> {{ dateFormat($value.createdAt,'YYYY-MM-DD') }}
+                                            <i class="ico-20 ico-admin pos-r t-4 ml-4"></i> {{$value.author ||'admin'}}
+                                            <i class="ico-20 ico-view pos-r t-5 ml-4"></i> 阅读（<span class="pv-count" data-id="{{$value.id}}">{{$value.pv}}</span>）
+                                        </p>
+                                        <p class="f-14 ellips-3 c-595959">
+                                            <a href="{{$value.path}}/article-{{$value.id}}.html" title="{{$value.title}}">{{@ $value.description}}[详情]</a>
+                                        </p>
+                                    </div>
+                                </figure>
+                            </li>
+                            {{/each}}
+                        </ul>
+                        {{else}}
+                        <div class="el-empty">
+                            <div class="mt-35 mb-35 f-30">
+                                <p>灯火阑珊处，</p>
+                                <p>文章一点无！</p>
+                            </div>
+                        </div>
+                        {{/if}}
+                    </div>
+
+                    <!-- 分页 -->
+                    {{if pageHtml}}
+                    <div class="page mt-1 bg-fff pd-25 flex justify-center radius-6">
+                        <ul class="overflow-h center list-none" id="page">
+                            {{@ pageHtml}}
+                        </ul>
+                    </div>
+                    {{/if}}
+                </div>
+
+                <!-- 右侧：侧边栏 -->
+                <div class="expose-sidebar">
+                    <div class="expose-sidebar-inner">
+                        <!-- 广告图：纯CSS实现 -->
+                        <a href="/home/platrange/index.html" target="_blank" class="expose-ad-banner">
+                            <div class="expose-ad-box">
+                                <p class="expose-ad-line1">怕被外汇黑平台骗</p>
+                                <p class="expose-ad-line2">查看2026年</p>
+                                <p class="expose-ad-line3"><span>正规外汇平台排名</span></p>
+                            </div>
+                        </a>
+
+                        <!-- 更多分类（标签列表） -->
+                        <div class="expose-cate-box">
+                            <div class="expose-cate-title">更多分类</div>
+                            <div class="expose-cate-grid">
+                                {{each tag}}
+                                <a class="expose-cate-item" href="/tags/{{$value.path}}/tag.html?tag={{$value.name}}" target="_blank">{{$value.name}}</a>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {{include './common/footer.html'}}
+    {{include './common/wap-nav.html'}}
+    {{include './common/js.html'}}
+</body>
+</html>

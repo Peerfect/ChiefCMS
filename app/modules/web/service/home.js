@@ -64,14 +64,40 @@ const home = {
 
     // 如果没有配置home，使用默认查询
     if (!config || Object.keys(config).length === 0) {
-      const [article, banner, recommend, imgs, news] = await Promise.all([
+      const [article, banner, recommend, imgs, news, hotRecommend, latestArticles] = await Promise.all([
         common.getArticleListByCids({}),
-        common.bannerSlide({}),
+        // 轮播图：取外汇开户(cid=19)最新3条文章
+        Chan.db("cms_article")
+          .select(["id", "title", "img as imgUrl", "description as content"])
+          .where("cid", 19)
+          .where("status", 0)
+          .orderBy("createdAt", "desc")
+          .limit(3)
+          .then(list => list.map(a => ({
+            ...a,
+            linkUrl: `/whkh/article-${a.id}.html`
+          }))),
         common.getArticleList({ attr: "1", pageSize: 10 }),
         common.getNewImgList({ pageSize: 6 }),
         common.getArticleList({ pageSize: 10 }),
+        // 热门推荐：从外汇行情(17)/外汇平台(18)/外汇开户(19)/外汇入门(21)/外汇交易(22)取最新4条
+        Chan.db("cms_article as a")
+          .select(["a.id", "a.title", "a.img", "a.description", "a.createdAt", "c.path"])
+          .leftJoin("cms_category as c", "a.cid", "c.id")
+          .whereIn("a.cid", [17, 18, 19, 21, 22])
+          .where("a.status", 0)
+          .orderBy("a.createdAt", "desc")
+          .limit(4),
+        // 最新文章：科技栏目(cid=28)
+        Chan.db("cms_article as a")
+          .select(["a.id", "a.title", "a.createdAt", "c.path"])
+          .leftJoin("cms_category as c", "a.cid", "c.id")
+          .where("a.cid", 28)
+          .where("a.status", 0)
+          .orderBy("a.createdAt", "desc")
+          .limit(10),
       ]);
-      return { article, banner, recommend, imgs, news };
+      return { article, banner, recommend, imgs, news, hotRecommend, latestArticles };
     }
     
     const apiCalls = getApiCalls(config, {}, common);
