@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /base/
+Disallow: /oss/
+Disallow: /api/
+Disallow: /member/
+
+Sitemap: https://www.chancms.top/sitemap.xml

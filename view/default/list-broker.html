@@ -3,12 +3,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="description" content="{{cate.seoDescription || site.description}}">
-    <meta name="keywords" content="{{cate.seoKeywords || site.keywords}}" />
-    <meta property="og:title" content="{{cate.seoTitle || cate.name}}-{{site.name}}" />
-    <meta property="og:description" content="{{site.description}}" />
-    <title>{{cate.seoTitle || cate.name}}-{{site.name}}</title>
-    {{include './common/meta.html'}}
+{{include './common/seo.html'}}
+{{include './common/meta.html'}}
     <style>
         .broker-page { max-width: 900px; margin: 0 auto; }
         .broker-page h1 { font-size: 24px; font-weight: bold; color: #333; margin-bottom: 15px; line-height: 1.4; }
@@ -70,6 +66,8 @@
 
     <main class="pt-20 pb-20">
         <div class="main center">
+            <div class="expose-layout">
+            <div class="expose-main">
             <div class="bg-fff radius-6 pd-15 mb-1 f-14 c-999">
                 <i class="ico-20 ico-home pos-r t-3"></i>
                 <a href="/">首页</a> /
@@ -208,6 +206,9 @@
                 {{@ pageHtml}}
             </div>
             {{/if}}
+            </div>
+            {{include './common/sidebar.html'}}
+            </div>
         </div>
     </main>
 

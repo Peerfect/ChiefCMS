@@ -1,0 +1,65 @@
+{{if article && article.title}}
+<title>{{site.title}}-{{article.title}}</title>
+<meta property="og:title" content="{{site.title}}-{{article.title}}" />
+<meta name="keywords" content="{{article.tagNames || cate && cate.seoKeywords || site.keywords}}" />
+<meta name="description" content="{{article.description || cate && cate.seoDescription || site.description}}" />
+<meta property="og:description" content="{{article.description || site.description}}" />
+<link rel="canonical" href="http://{{site.domain}}{{cate && cate.path || ''}}/article-{{article.id}}.html" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{article.title}}",
+  "description": "{{article.description || ''}}",
+  "datePublished": "{{article.createdAt}}",
+  "dateModified": "{{article.updatedAt || article.createdAt}}",
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{site.name}}"
+  }
+}
+</script>
+{{else if cate && cate.name}}
+<title>{{site.title}}-{{cate.seoTitle || cate.name}}</title>
+<meta property="og:title" content="{{site.title}}-{{cate.seoTitle || cate.name}}" />
+<meta name="keywords" content="{{cate.seoKeywords || site.keywords}}" />
+<meta name="description" content="{{cate.seoDescription || site.description}}" />
+<meta property="og:description" content="{{cate.seoDescription || site.description}}" />
+<link rel="canonical" href="http://{{site.domain}}{{cate.path}}/index.html" />
+{{else if keywords}}
+<title>{{site.title}}-{{keywords}}</title>
+<meta property="og:title" content="{{site.title}}-{{keywords}}" />
+<meta name="keywords" content="{{keywords}},{{site.keywords}}" />
+<meta name="description" content="{{site.description}}" />
+<meta property="og:description" content="{{site.description}}" />
+{{else if path}}
+<title>{{site.title}}-{{path}}</title>
+<meta property="og:title" content="{{site.title}}-{{path}}" />
+<meta name="keywords" content="{{site.keywords}}" />
+<meta name="description" content="{{site.description}}" />
+<meta property="og:description" content="{{site.description}}" />
+{{else}}
+<title>{{site.title}}-{{site.name}}</title>
+<meta property="og:title" content="{{site.title}}-{{site.name}}" />
+<meta name="keywords" content="{{site.keywords}}" />
+<meta name="description" content="{{site.description}}" />
+<meta property="og:description" content="{{site.description}}" />
+<link rel="canonical" href="http://{{site.domain}}/" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "{{site.name}}",
+  "url": "http://{{site.domain}}/",
+  "description": "{{site.description}}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "http://{{site.domain}}/search/{search_term_string}/words.html",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+{{/if}}
+<meta property="og:url" content="http://{{site.domain}}" />
+<meta property="og:site_name" content="{{site.name}}" />
+<meta property="og:locale" content="zh_CN" />

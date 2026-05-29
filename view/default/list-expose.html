@@ -3,12 +3,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="description" content="{{cate.seoDescription || site.description}}">
-    <meta name="keywords" content="{{cate.seoKeywords || site.keywords}}" />
-    <meta property="og:title" content="{{cate.seoTitle || cate.name}}-{{site.name}}" />
-    <meta property="og:description" content="{{site.description}}" />
-    <title>{{cate.seoTitle || cate.name}}-{{site.name}}</title>
-    {{include './common/meta.html'}}
+{{include './common/seo.html'}}
+{{include './common/meta.html'}}
     <style>
     .expose-layout { display:flex; gap:20px; }
     .expose-main { flex:1; min-width:0; }
@@ -103,7 +99,7 @@
                 <div class="expose-sidebar">
                     <div class="expose-sidebar-inner">
                         <!-- 广告图：纯CSS实现 -->
-                        <a href="/home/platrange/index.html" target="_blank" class="expose-ad-banner">
+                        <a href="/home/platrange/article-432.html" target="_blank" class="expose-ad-banner">
                             <div class="expose-ad-box">
                                 <p class="expose-ad-line1">怕被外汇黑平台骗</p>
                                 <p class="expose-ad-line2">查看2026年</p>

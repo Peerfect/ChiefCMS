@@ -4,7 +4,10 @@
  * 一天同步一次，CMS 后台手动添加的文章（sort > 0）始终排前面
  */
 import * as cheerio from "cheerio";
-import { Service } from "chanjs";
+import { Service, Paths } from "chanjs";
+import fs from "fs";
+import path from "path";
+import dayjs from "dayjs";
 
 class ForexSyncService extends Service {
   constructor() {
@@ -137,18 +140,23 @@ class ForexSyncService extends Service {
 
       // 4. 批量插入
       if (newArticles.length > 0) {
-        const insertData = newArticles.map((a) => ({
-          title: a.title,
-          description: a.description || "",
-          img: a.img || "",
-          link: a.url,
-          cid: cid,
-          source: "scraped",
-          content: a.content || a.description || "",
-          status: 0,
-          pv: 0,
-          createdAt: a.date ? new Date(a.date) : new Date(),
-        }));
+        const insertData = [];
+        for (const a of newArticles) {
+          // 下载缩略图到本地
+          const localImg = await this.downloadImage(a.img);
+          insertData.push({
+            title: a.title,
+            description: a.description || "",
+            img: localImg,
+            link: a.url,
+            cid: cid,
+            source: "scraped",
+            content: a.content || a.description || "",
+            status: 0,
+            pv: 0,
+            createdAt: a.date ? new Date(a.date) : new Date(),
+          });
+        }
 
         for (let i = 0; i < insertData.length; i += 20) {
           const batch = insertData.slice(i, i + 20);
@@ -243,10 +251,11 @@ class ForexSyncService extends Service {
       // 4. 批量插入
       if (newArticles.length > 0) {
         for (const a of newArticles) {
+          const localImg = await this.downloadImage(a.img);
           await this.db("cms_article").insert({
             title: a.title,
             description: a.description || "",
-            img: a.img || "",
+            img: localImg,
             link: a.url,
             cid: cid,
             source: "scraped",
@@ -267,6 +276,62 @@ class ForexSyncService extends Service {
       };
     } finally {
       this.syncing = false;
+    }
+  }
+
+  /**
+   * 下载远程图片到本地
+   * @param {string} imgUrl - 远程图片URL
+   * @returns {string} 本地图片路径（相对路径），失败返回空字符串
+   */
+  async downloadImage(imgUrl) {
+    if (!imgUrl || (!imgUrl.startsWith("http://") && !imgUrl.startsWith("https://"))) {
+      return "";
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch(imgUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept: "image/*",
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+      if (!response.ok) return "";
+
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.startsWith("image/")) return "";
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+      if (buffer.length < 100) return ""; // 太小，可能不是有效图片
+
+      // 根据content-type确定扩展名
+      const extMap = { "image/jpeg": "jpg", "image/png": "png", "image/gif": "gif", "image/webp": "webp", "image/svg+xml": "svg" };
+      const ext = extMap[contentType.split(";")[0]] || "jpg";
+
+      // 存储路径: public/uploads/{template}/image/{date}/{timestamp}.{ext}
+      const template = Chan.config.template || "default";
+      const date = dayjs().format("YYYY/MM/DD");
+      const dir = path.join("public", "uploads", template, "image", date);
+      const fullDir = path.join(Paths.rootPath, dir);
+
+      fs.mkdirSync(fullDir, { recursive: true });
+
+      const filename = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const filePath = path.join(fullDir, filename);
+
+      fs.writeFileSync(filePath, buffer);
+
+      // 返回相对路径
+      return `/${dir.replace(/\\/g, "/")}/${filename}`;
+    } catch (err) {
+      console.error("[ForexSync] 下载图片失败:", imgUrl, err.message);
+      return "";
     }
   }
 

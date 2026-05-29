@@ -2,12 +2,80 @@ import { helper } from "chanjs";
 import init from "./middleware/init.js";
 import adapter from "./middleware/adapter.js";
 import { singleUpload, multiUpload, logo } from "../../common/upload.js";
+import sitemapPush from "./service/sitemapPush.js";
 
 export default async (app, router, config) => {
   let controller = await helper.loadController("web");
   
   router.use(adapter());
   router.use(init());
+
+  // robots.txt
+  router.get("/robots.txt", (req, res) => {
+    const domain = Chan.config.data?.site?.domain || req.get("host");
+    res.set("Content-Type", "text/plain");
+    res.send(`User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /base/
+Disallow: /oss/
+Disallow: /api/
+Disallow: /member/
+
+Sitemap: ${req.protocol}://${domain}/sitemap.xml
+`);
+  });
+
+  // sitemap.xml 动态生成
+  router.get("/sitemap.xml", async (req, res) => {
+    try {
+      const domain = Chan.config.data?.site?.domain || req.get("host");
+      const baseUrl = `${req.protocol}://${domain}`;
+
+      // 获取所有栏目
+      const categories = await Chan.db("cms_category")
+        .select("id", "name", "path")
+        .where("status", 0);
+
+      // 获取最新500篇文章
+      const articles = await Chan.db("cms_article as a")
+        .select(["a.id", "a.title", "a.createdAt", "a.updatedAt", "c.path"])
+        .leftJoin("cms_category as c", "a.cid", "c.id")
+        .where("a.status", 0)
+        .orderBy("a.createdAt", "desc")
+        .limit(500);
+
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+      // 首页
+      xml += `  <url>\n    <loc>${baseUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+
+      // 栏目页
+      for (const cate of categories) {
+        if (cate.path) {
+          xml += `  <url>\n    <loc>${baseUrl}${cate.path}/index.html</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+        }
+      }
+
+      // 文章页
+      for (const article of articles) {
+        const lastmod = article.updatedAt || article.createdAt;
+        const dateStr = lastmod ? new Date(lastmod).toISOString().split("T")[0] : "";
+        xml += `  <url>\n    <loc>${baseUrl}${article.path}/article-${article.id}.html</loc>\n`;
+        if (dateStr) xml += `    <lastmod>${dateStr}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+      }
+
+      xml += "</urlset>";
+
+      res.set("Content-Type", "application/xml");
+      res.send(xml);
+    } catch (error) {
+      console.error("Sitemap generation error:", error);
+      res.status(500).send("Error generating sitemap");
+    }
+  });
 
   // 首页模板
   router.get(["/", "/index.html", "/index.php"], controller.home.index);
@@ -176,4 +244,7 @@ export default async (app, router, config) => {
 
   // 使用路由
   app.use(router);
+
+  // 启动 sitemap 定时推送
+  sitemapPush.start();
 };

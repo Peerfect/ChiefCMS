@@ -555,8 +555,8 @@ html {
 }
 
 .article-index {
-    width: 1400px;
-    flex-shrink: 0;
+    width: 100%;
+    min-width: 0;
 }
 
 .article-aside {
@@ -1323,4 +1323,25 @@ iframe {
     --borderColor-muted: #d1d9e0b3 !important;
     background-color: #ffffff !important;
     color: #1f2328 !important;
+}
+
+/* 列表页侧边栏通用样式 */
+.expose-layout { display:flex; gap:30px; }
+.expose-main { flex:1; min-width:0; }
+.list-sidebar { width:300px; flex-shrink:0; }
+.list-sidebar-inner { position:sticky; top:80px; }
+.expose-ad-banner { display:block; margin-bottom:20px; text-decoration:none; border-radius:6px; overflow:hidden; }
+.expose-ad-box { background:#000; padding:30px 25px; text-align:center; }
+.expose-ad-line1 { font-size:20px; font-weight:bold; color:#fff; margin-bottom:15px; }
+.expose-ad-line2 { font-size:26px; font-weight:bold; color:#e74c3c; margin-bottom:15px; }
+.expose-ad-line3 span { display:inline-block; background:#e74c3c; color:#fff; font-size:20px; font-weight:bold; padding:8px 20px; }
+.expose-ad-banner:hover .expose-ad-box { background:#111; }
+.expose-cate-box { background:#fff; border-radius:6px; padding:20px; }
+.expose-cate-title { font-size:14px; color:#666; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid #eee; }
+.expose-cate-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.expose-cate-item { display:block; padding:8px 12px; text-align:center; background:#f8f8f8; border-radius:4px; font-size:13px; color:#333; text-decoration:none; transition:all .2s; }
+.expose-cate-item:hover { background:#6d6de6; color:#fff; }
+@media (max-width:768px) {
+    .expose-layout { flex-direction:column; }
+    .list-sidebar { width:100%; }
 }

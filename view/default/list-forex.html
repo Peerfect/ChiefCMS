@@ -3,19 +3,18 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="description" content="{{cate.seoDescription || site.description}}">
-    <meta name="keywords" content="{{cate.seoKeywords || site.keywords}}" />
-    <meta property="og:title" content="{{cate.seoTitle || cate.name}}-{{site.name}}" />
-    <meta property="og:description" content="{{site.description}}" />
-    <title>{{cate.seoTitle || cate.name}}-{{site.name}}</title>
-    {{include './common/meta.html'}}
+{{include './common/seo.html'}}
+{{include './common/meta.html'}}
 
+</head>
 <body class="bg-f8f8f8">
     <!-- 头部 -->
     {{include './common/header.html'}}
 
     <main class="pt-20 pb-20 flex">
-        <div class="main center flex gap-20">
+        <div class="main center">
+            <div class="expose-layout">
+            <div class="expose-main">
             <article class="article-index">
                 <div class="bg-fff pd-15 mb-1 f-14 c-999 radius-6">
                     <i class="ico-20 ico-home pos-r t-3"></i>
@@ -38,6 +37,9 @@
                     </div>
                 </div>
             </article>
+            </div>
+            {{include './common/sidebar.html'}}
+            </div>
         </div>
     </main>
 
