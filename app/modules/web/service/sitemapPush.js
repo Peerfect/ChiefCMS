@@ -49,10 +49,11 @@ class SitemapPushService {
       this.pingGoogle(sitemapUrl),
       this.pingBing(sitemapUrl),
       this.pingBaidu(domain),
+      this.ping360(domain),
     ]);
 
+    const names = ["Google", "Bing", "百度", "360"];
     results.forEach((result, index) => {
-      const names = ["Google", "Bing", "百度"];
       if (result.status === "fulfilled") {
         console.log(`[SitemapPush] ${names[index]}: ${result.value}`);
       } else {
@@ -136,6 +137,52 @@ class SitemapPushService {
       } else {
         return `响应: ${JSON.stringify(data)}`;
       }
+    } catch (err) {
+      return `失败: ${err.message}`;
+    }
+  }
+  /**
+   * 360搜索推送
+   * 360站长平台支持 sitemap 提交和URL提交
+   * 提交入口：https://zhanzhang.so.com/sitetool/sitemap
+   * 同时通过访问360收录提交接口推送新URL
+   */
+  async ping360(domain) {
+    try {
+      // 获取最近24小时新文章
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const articles = await Chan.db("cms_article as a")
+        .select(["a.id", "c.path"])
+        .leftJoin("cms_category as c", "a.cid", "c.id")
+        .where("a.status", 0)
+        .where("a.createdAt", ">", yesterday)
+        .orderBy("a.createdAt", "desc")
+        .limit(50);
+
+      if (articles.length === 0) {
+        return "跳过（无新文章）";
+      }
+
+      // 逐个提交到360收录（通过site_submit接口）
+      let successCount = 0;
+      for (const a of articles) {
+        try {
+          const articleUrl = `https://${domain}${a.path}/article-${a.id}.html`;
+          const submitUrl = `https://info.so.360.cn/site_submit.html?url=${encodeURIComponent(articleUrl)}`;
+          const res = await fetch(submitUrl, {
+            method: "GET",
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            },
+            signal: AbortSignal.timeout(5000),
+          });
+          if (res.ok) successCount++;
+        } catch (e) {
+          // 单条失败不影响整体
+        }
+      }
+
+      return `提交 ${successCount}/${articles.length} 条URL`;
     } catch (err) {
       return `失败: ${err.message}`;
     }
