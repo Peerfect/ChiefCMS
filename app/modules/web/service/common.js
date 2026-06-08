@@ -762,12 +762,17 @@ async getArticleListByCid({ cid, pageSize = 5, attr = [], start = 0, excludeAttr
         ? "INSTR(',' || a.tagId || ',', ',' || t.id || ',') > 0"
         : "FIND_IN_SET(t.id, a.tagId) > 0";
 
+      // 同时支持按 path 和 name 查找 tag
+      const tagCondition = function() {
+        this.where("t.path", path).orWhere("t.name", path);
+      };
+
       const totalResult = await Chan.db("cms_article as a")
         .whereExists((qb) => {
           qb.select(Chan.db.raw("1"))
             .from("cms_tag as t")
             .whereRaw(findInSetCondition)
-            .where("t.path", path);
+            .where(tagCondition);
         })
         .andWhere("a.status", 0)
         .count("a.id as total");
@@ -793,7 +798,7 @@ async getArticleListByCid({ cid, pageSize = 5, attr = [], start = 0, excludeAttr
           qb.select(Chan.db.raw("1"))
             .from("cms_tag as t")
             .whereRaw(findInSetCondition)
-            .where("t.path", path);
+            .where(tagCondition);
         })
         .andWhere("a.status", 0)
         .orderBy("a.createdAt", "desc")

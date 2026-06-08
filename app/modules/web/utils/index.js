@@ -141,7 +141,7 @@ export const searchDataParse = ({ data, keywords, page }) => {
 export const tagParams = (req) => {
   const { template } = req.app.locals;
   const { path, current = 1 } = req.params;
-  const { tag } = req.query;
+  const tag = req.query.tag || path;
   const page = +current;
   return { page, template, path, tag };
 };

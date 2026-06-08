@@ -237,8 +237,46 @@ const home = {
 
     // 如果没有配置search，使用默认查询
     if (!config || Object.keys(config).length === 0) {
-      const search = await common.tags({ path: keywords, page });
-      return { search: { count: search.total, list: search.list } };
+      // 先尝试通过 tag path 搜索
+      const tagResult = await common.tags({ path: keywords, page });
+      
+      // 如果 tag 搜索有结果，直接返回
+      if (tagResult.list && tagResult.list.length > 0) {
+        return { search: { count: tagResult.total, list: tagResult.list } };
+      }
+
+      // tag 搜索无结果，改为全文模糊搜索（标题 + 描述）
+      const pageSize = 10;
+      const offset = (page - 1) * pageSize;
+      
+      const totalResult = await Chan.db("cms_article")
+        .where("status", 0)
+        .where(function() {
+          this.where("title", "like", `%${keywords}%`)
+            .orWhere("description", "like", `%${keywords}%`);
+        })
+        .count("id as count")
+        .first();
+      
+      const count = totalResult?.count || 0;
+
+      const list = await Chan.db("cms_article as a")
+        .select(
+          "a.id", "a.title", "a.shortTitle", "a.img",
+          "a.description", "a.createdAt", "a.author", "a.pv",
+          "c.pinyin", "c.name", "c.path"
+        )
+        .leftJoin("cms_category as c", "a.cid", "c.id")
+        .where("a.status", 0)
+        .where(function() {
+          this.where("a.title", "like", `%${keywords}%`)
+            .orWhere("a.description", "like", `%${keywords}%`);
+        })
+        .orderBy("a.createdAt", "desc")
+        .offset(offset)
+        .limit(pageSize);
+
+      return { search: { count, list } };
     }
 
     const apiCalls = getApiCalls(

@@ -2,7 +2,34 @@
 
 body, .bg-f2f2f2 {
     background-color: #fff !important;
-    padding-top: 110px;
+    padding-top: 150px;
+}
+
+/* 图片 hover 放大动画 */
+.thumb-120,
+.thumb-80,
+.img-ratio,
+figure .thumb-120,
+.article-index img,
+.list img,
+.index-mid img {
+    overflow: hidden;
+}
+.thumb-120 img,
+.thumb-80 img,
+.img-ratio img,
+.article-index img,
+.list img,
+.index-mid img {
+    transition: transform 0.3s ease;
+}
+.thumb-120:hover img,
+.thumb-80:hover img,
+.img-ratio:hover img,
+.article-index a:hover img,
+.list a:hover img,
+.index-mid a:hover img {
+    transform: scale(1.08);
 }
 
 .el-tag {
@@ -166,11 +193,10 @@ html {
 }
 
 .header-collapsed {
-    transform: translateY(-60px);
+    transform: translateY(-108px);
 }
 
 .header-top {
-    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -188,15 +214,12 @@ html {
 .header {
     max-width: 1500px;
     width: calc(75% + 100px);
-    padding: 8px 0;
+    padding: 12px 0;
 }
 
 .logo {
-    height: 44px;
-    font-weight: 600;
-    line-height: 44px;
-    font-size: 20px;
-    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
 }
 
 .theme {

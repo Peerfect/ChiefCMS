@@ -13,11 +13,11 @@
         <!-- 标签列表 -->
         <div class="expose-cate-box">
             <div class="expose-cate-title">热门标签</div>
-            <div class="expose-cate-grid">
+            <p style="line-height: 2;">
                 {{each tag}}
-                <a class="expose-cate-item" href="/tags/{{$value.path}}/tag.html?tag={{$value.name}}" target="_blank">{{$value.name}}</a>
+                <a class="el-tag mr-5 mb-5" href="/tags/{{$value.name}}/tag.html">{{$value.name}}</a>
                 {{/each}}
-            </div>
+            </p>
         </div>
     </div>
 </div>

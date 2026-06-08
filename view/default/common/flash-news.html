@@ -46,7 +46,32 @@
     border-left-color: #e74c3c;
 }
 .flash-item.important::before {
-    background: #e74c3c;
+    background: #6d6de6;
+    animation: flashDot 1.5s ease-in-out infinite;
+}
+.flash-item.important .flash-time {
+    color: #e74c3c;
+    animation: flashText 1.5s ease-in-out infinite;
+}
+.flash-item.important .flash-content {
+    color: #e74c3c;
+    animation: flashText 1.5s ease-in-out infinite;
+}
+.flash-item:first-child::before {
+    background: #6d6de6;
+    animation: flashDot 1.5s ease-in-out infinite;
+}
+.flash-item:first-child .flash-time,
+.flash-item:first-child .flash-content {
+    animation: flashText 1.5s ease-in-out infinite;
+}
+@keyframes flashDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.4); }
+}
+@keyframes flashText {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }
 .flash-item .flash-time {
     font-size: 13px;
@@ -55,16 +80,10 @@
     margin-right: 12px;
     min-width: 60px;
 }
-.flash-item.important .flash-time {
-    color: #e74c3c;
-}
 .flash-item .flash-content {
     font-size: 14px;
     color: #333;
     line-height: 1.6;
-}
-.flash-item.important .flash-content {
-    color: #e74c3c;
 }
 .flash-loading {
     text-align: center;
