@@ -36,4 +36,20 @@
         {{/each}}
     </ul>
 </nav>
+<script>
+(function() {
+    var path = window.location.pathname;
+    var items = document.querySelectorAll('.header-wrap .nav-item');
+    items.forEach(function(item) {
+        var link = item.querySelector('a');
+        if (!link) return;
+        var href = link.getAttribute('href');
+        if (href === '/' && path === '/') {
+            item.classList.add('active');
+        } else if (href !== '/' && path.indexOf(href.replace('/index.html', '').replace('/page.html', '')) === 0) {
+            item.classList.add('active');
+        }
+    });
+})();
+</script>
 {{/if}}
