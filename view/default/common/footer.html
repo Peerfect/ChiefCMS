@@ -1,8 +1,51 @@
 <footer>
-    <div class="footer center text-c pd-20">
-        <p class="text-c mt-10 f-14">©copyright <a href="https://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener" style="color:inherit;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#6d6de6'" onmouseout="this.style.color='inherit'">{{site.icp}}</a></p>
+    <div class="footer-disclaimer">
+        <div class="footer-disclaimer-inner center">
+            <h4>免责声明</h4>
+            <p>本网站所有刊登内容，以及所提供的信息资料，目的是为了更好地服务我们的访问者，本网站不保证所有信息、文本、图形、链接及其它项目的绝对准确性和完整性，网站没有任何盈利目的，故仅供访问者参照使用。本网站已尽力确保所有资料是准确、完整及最新的。就该资料的针对性、精确性以及特定用途的适合性而言，本网站不能作出最对应的方案。所以因依赖该资料所致的任何损失，本网均不负责。除特别注明之服务条款外，其他一切因使用本站而引致的任何意外、疏忽、合约毁坏、隐秘汇漏、诽谤、版权或知识产权侵犯及其所造成的损失，本站概不负责，亦不承担任何法律责任。如您（单位或个人）认为本网站某部分内容有侵权嫌疑，敬请立即通知我们，我们将在第一时间予以更改或删除。以上声明之解释权归本网站所有。法律上有相关解释的，以中国法律之解释为基准。如有争议限在我方所在地司法部门解决。</p>
+        </div>
+    </div>
+    <div class="footer-bottom center">
+        <div class="footer-bottom-inner">
+            <span><a href="/" style="color:#fff;text-decoration:none;font-weight:bold;">{{site.name}}</a>（{{site.domain}}）</span>
+            <span>Copyright © 2022 2023 All Rights Reserved <a href="https://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener" style="color:#aaa;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#6d6de6'" onmouseout="this.style.color='#aaa'">{{site.icp}}</a></span>
+        </div>
     </div>
 </footer>
+
+<style>
+.footer-disclaimer {
+    background: #333;
+    padding: 30px 20px;
+}
+.footer-disclaimer-inner {
+    max-width: 1280px;
+}
+.footer-disclaimer h4 {
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+.footer-disclaimer p {
+    color: #aaa;
+    font-size: 13px;
+    line-height: 1.8;
+}
+.footer-bottom {
+    background: #333;
+    padding: 15px 20px;
+    border-top: 1px solid #444;
+}
+.footer-bottom-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #aaa;
+}
+</style>
 {{include './debug.html'}}
 
 <!-- 返回顶部 -->
