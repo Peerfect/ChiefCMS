@@ -66,28 +66,61 @@ class SitemapPushService {
   }
 
   /**
-   * Google Ping
-   * https://www.google.com/ping?sitemap=URL
+   * Google Indexing API (通过 sitemap 提交)
+   * Google 已弃用 ping 接口，改为直接提交 sitemap 到 Search Console
+   * 这里保留为日志记录，实际通过 Search Console 自动抓取
    */
   async pingGoogle(sitemapUrl) {
     try {
-      const url = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
-      const res = await fetch(url, { method: "GET", signal: AbortSignal.timeout(10000) });
-      return res.ok ? "成功" : `HTTP ${res.status}`;
+      // Google 已弃用 ping 接口(2023)，sitemap 通过 Search Console 自动发现
+      // 保留此方法作为记录，不再主动 ping
+      return "跳过（Google已弃用ping接口，请通过Search Console提交sitemap）";
     } catch (err) {
       return `失败: ${err.message}`;
     }
   }
 
   /**
-   * Bing/IndexNow Ping
-   * https://www.bing.com/ping?sitemap=URL
+   * Bing IndexNow 推送
+   * Bing 已弃用 ping 接口，改用 IndexNow 协议
+   * https://www.indexnow.org/
    */
   async pingBing(sitemapUrl) {
     try {
-      const url = `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
-      const res = await fetch(url, { method: "GET", signal: AbortSignal.timeout(10000) });
-      return res.ok ? "成功" : `HTTP ${res.status}`;
+      const domain = sitemapUrl.replace(/https?:\/\//, '').split('/')[0];
+      
+      // 获取最近24小时新文章URL
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const articles = await Chan.db("cms_article as a")
+        .select(["a.id", "c.path"])
+        .leftJoin("cms_category as c", "a.cid", "c.id")
+        .where("a.status", 0)
+        .where("a.createdAt", ">", yesterday)
+        .orderBy("a.createdAt", "desc")
+        .limit(100);
+
+      if (articles.length === 0) {
+        return "跳过（无新文章）";
+      }
+
+      const urls = articles.map(a => `https://${domain}${a.path}/article-${a.id}.html`);
+
+      // IndexNow 协议推送
+      const res = await fetch("https://api.indexnow.org/indexnow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          host: domain,
+          key: "chancms2026indexnow",
+          urlList: urls,
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (res.ok || res.status === 202) {
+        return `IndexNow 推送成功 ${urls.length} 条URL`;
+      }
+      return `IndexNow HTTP ${res.status}`;
     } catch (err) {
       return `失败: ${err.message}`;
     }
@@ -100,7 +133,7 @@ class SitemapPushService {
    */
   async pingBaidu(domain) {
     try {
-      const token = process.env.BAIDU_PUSH_TOKEN || Chan.config.baiduPushToken;
+      const token = (process.env.BAIDU_PUSH_TOKEN || Chan.config.baiduPushToken || "").trim();
       if (!token) {
         return "跳过（未配置 baiduPushToken）";
       }

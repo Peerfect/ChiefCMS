@@ -431,7 +431,45 @@ class ForexSyncService extends Service {
       const $ = cheerio.load(html);
       const $content = $(".entry-content");
 
-      // 外链域名替换为 chiefrich.com
+      // 移除免责声明、授权转载、广告等非正文内容
+      const removePatterns = [
+        /※\s*本文经.{0,50}授权转载/,
+        /※\s*免责声明/,
+        /免责声明[：:]/,
+        /本文仅供参考.*投资建议/,
+        /投资人应独立判断.*评估风险/,
+        /原文出处/,
+        /原文连结/,
+        /原文链接/,
+        /本文禁止任何商业性转载/,
+        /如需转载需联系小编/,
+        /部分内容整理自网络.*侵权请联系删除/,
+        /标题：.*收录于/,
+        /文中所提的个股.*并非投资建议/,
+        /以上内容仅供参考/,
+        /风险提示[：:].*自行承担/,
+        /本网站所有刊登内容/,
+        /本站概不负责.*不承担任何法律责任/,
+      ];
+
+      // 逐个段落检查，移除匹配的段落
+      $content.find("p, div, span").each((i, el) => {
+        const $el = $(el);
+        const text = $el.text().trim();
+        
+        // 跳过空元素
+        if (!text) return;
+        
+        // 检查是否匹配需要移除的模式
+        for (const pattern of removePatterns) {
+          if (pattern.test(text)) {
+            $el.remove();
+            return;
+          }
+        }
+      });
+
+      // 外链域名替换
       $content.find("a").each((i, el) => {
         const $a = $(el);
         const href = $a.attr("href") || "";
@@ -457,6 +495,14 @@ class ForexSyncService extends Service {
         const dataSrc = $img.attr("data-src") || "";
         if (dataSrc && !dataSrc.startsWith("http") && !dataSrc.startsWith("data:")) {
           $img.attr("data-src", `https://www.chiefrich.com${dataSrc.startsWith("/") ? "" : "/"}${dataSrc}`);
+        }
+      });
+
+      // 最终清理：移除空段落
+      $content.find("p").each((i, el) => {
+        const $el = $(el);
+        if (!$el.text().trim() && !$el.find("img").length) {
+          $el.remove();
         }
       });
 

@@ -1,6 +1,11 @@
 {{if article && article.title}}
+{{if cate && (cate.path === '/whhq' || cate.path === '/whplat' || cate.path === '/whkh' || cate.path === '/whcl' || cate.path === '/whrm' || cate.path === '/whjy' || cate.path === '/new' || cate.path === '/new/mg' || cate.path === '/new/hk' || cate.path === '/new/tw' || cate.path === '/new/AI')}}
+<title>{{article.title}}—天天财经</title>
+<meta property="og:title" content="{{article.title}}—天天财经" />
+{{else}}
 <title>{{site.title}}-{{article.title}}</title>
 <meta property="og:title" content="{{site.title}}-{{article.title}}" />
+{{/if}}
 <meta name="keywords" content="{{article.tagNames || cate && cate.seoKeywords || site.keywords}}" />
 <meta name="description" content="{{article.description || cate && cate.seoDescription || site.description}}" />
 <meta property="og:description" content="{{article.description || site.description}}" />

@@ -193,10 +193,7 @@ html {
 
 .logo {
     height: 44px;
-    background: url(../img/logo.svg) left center no-repeat;
-    background-size: 44px 44px;
     font-weight: 600;
-    padding-left: 52px;
     line-height: 44px;
     font-size: 20px;
     letter-spacing: -0.5px;

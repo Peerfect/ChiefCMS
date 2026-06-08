@@ -45,13 +45,11 @@
                     </div>
 
                     <style>
-                    .realtime-layout { display: flex; gap: 20px; padding-top: 20px; align-items: stretch; }
-                    .realtime-left { width: 55%; flex-shrink: 0; display:flex; flex-direction:column; }
-                    .realtime-right { flex: 1; display:flex; flex-direction:column; }
-                    .realtime-left .market-quotes-widget { flex:1; display:flex; flex-direction:column; }
-                    .realtime-left #mqContainer { flex:1; overflow-y:auto; }
-                    .realtime-right .flash-news-section { flex:1; display:flex; flex-direction:column; }
-                    .realtime-right .flash-news-list { flex:1; overflow-y:auto; max-height:none; }
+                    .realtime-layout { display: flex; gap: 20px; padding-top: 20px; position: relative; }
+                    .realtime-left { width: 55%; flex-shrink: 0; }
+                    .realtime-right { position: absolute; right: 0; top: 20px; bottom: 0; width: calc(45% - 20px); display:flex; flex-direction:column; overflow:hidden; }
+                    .realtime-right .flash-news-section { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
+                    .realtime-right .flash-news-list { flex:1; overflow-y:auto; min-height:0; }
                     </style>
                     {{else}}
                     {{if articleList.list.length>0}}
@@ -100,7 +98,7 @@
                 </div>
 
                 <!-- 分页 -->
-                {{if pageHtml}}
+                {{if pageHtml && !(cate && cate.name === '实时')}}
                 <div class="page mt-1 bg-fff pd-25 flex justify-center  radius-6" id="app">
                     <ul class="overflow-h center list-none" id="page">
                         {{@ pageHtml}}

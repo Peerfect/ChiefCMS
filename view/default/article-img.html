@@ -39,8 +39,8 @@
                                 <i class="ico-20 ico-time pos-r t-4"></i> 
                                 {{ dateFormat(article.updatedAt, 'YYYY-MM-DD HH:mm:ss') }}
                                 <i class="ico-20 ico-admin pos-r t-4 ml-4"></i> {{article.author}}
-                                <i class="ico-20 ico-view pos-r t-5 ml-4"></i> 阅读（{{article.pv}}?
-                                <!-- <i class="ico-20 ico-zan pos-r t-4 ml-4"></i>点赞?5?-->
+                                <i class="ico-20 ico-view pos-r t-5 ml-4"></i> 阅读（{{article.pv}}）
+                                <!-- <i class="ico-20 ico-zan pos-r t-4 ml-4"></i>点赞（95）-->
                             </span>
 
                             {{each article.tags}}
@@ -56,7 +56,7 @@
                     </section>
                     {{/if}}
                     <article id="article" class="article-cont f-17 lh-35">
-                        <div class="markdown-body">{{@ renderMarkdown(article.content) }}</div>
+                        <div class="markdown-body">{{@ article.content }}</div>
                     </article>
 
                 </div>

@@ -149,6 +149,39 @@ async function articleExists(link) {
   return !!existing;
 }
 
+// 清理旧数据，只保留最新的 N 条
+async function cleanOldArticles(cid, categoryName, keepCount = 20) {
+  try {
+    const total = await db('cms_article').where('cid', cid).count('id as count').first();
+    const count = total?.count || 0;
+
+    if (count <= keepCount) return 0;
+
+    // 获取需要保留的文章 ID
+    const keepIds = await db('cms_article')
+      .select('id')
+      .where('cid', cid)
+      .orderBy('createdAt', 'desc')
+      .limit(keepCount);
+
+    const idsToKeep = keepIds.map(r => r.id);
+
+    // 删除旧数据
+    const deleted = await db('cms_article')
+      .where('cid', cid)
+      .whereNotIn('id', idsToKeep)
+      .del();
+
+    if (deleted > 0) {
+      console.log(`  ${categoryName}: 清理旧数据 ${deleted} 条，保留最新 ${keepCount} 条`);
+    }
+    return deleted;
+  } catch (error) {
+    console.error(`  ${categoryName} 清理旧数据失败:`, error.message);
+    return 0;
+  }
+}
+
 // 同步单个分类的新闻
 async function syncCategory(cnyesCategory, cid, categoryName) {
   console.log(`\n开始同步: ${categoryName} (cnyes: ${cnyesCategory})`);
@@ -179,6 +212,11 @@ async function syncCategory(cnyesCategory, cid, categoryName) {
     } catch (error) {
       console.error(`  插入失败: ${article.title}`, error.message);
     }
+  }
+
+  // 实时栏目：插入新数据后只保留最新 20 条
+  if (categoryName === '实时') {
+    await cleanOldArticles(cid, categoryName, 20);
   }
 
   console.log(`  ${categoryName}: 获取 ${articles.length} 篇, 新增 ${insertCount} 篇`);

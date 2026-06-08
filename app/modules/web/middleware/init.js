@@ -53,6 +53,17 @@ export default () => {
         tag: tag || [],
       };
 
+      // 加载广告数据（cid=33 广告招商）
+      try {
+        const ads = await Chan.db("cms_article")
+          .select("id", "title", "img", "link")
+          .where("cid", 33)
+          .where("status", 1);
+        localsData.ads = ads || [];
+      } catch (e) {
+        localsData.ads = [];
+      }
+
       Object.assign(req.app.locals, localsData);
 
       // 写入缓存
