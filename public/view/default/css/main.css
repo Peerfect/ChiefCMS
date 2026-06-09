@@ -816,6 +816,11 @@ html {
 
 .article-cont p {
     margin-bottom: 20px;
+    text-indent: 2em;
+}
+
+.article-cont p:has(img) {
+    text-indent: 0;
 }
 
 .article-cont img,

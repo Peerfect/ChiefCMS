@@ -165,12 +165,21 @@ const home = {
     
     // 如果没有配置article，使用默认查询
     if (!config || Object.keys(config).length === 0) {
-      const [recommend, prev, next] = await Promise.all([
+      const [recommend, prev, next, randomRecommend] = await Promise.all([
         common.getArticlePvList({ pageSize: 10, cid }),
         common.prev({ id, cid }),
         common.next({ id, cid }),
+        // 从外汇相关栏目随机取12条带图文章
+        Chan.db("cms_article as a")
+          .select("a.id", "a.title", "a.img", "c.path")
+          .leftJoin("cms_category as c", "a.cid", "c.id")
+          .whereIn("a.cid", [17, 18, 19, 20, 21, 22])
+          .where("a.status", 0)
+          .whereNot("a.img", "")
+          .orderByRaw("RAND()")
+          .limit(8),
       ]);
-      return { recommend, prev, next };
+      return { recommend, prev, next, randomRecommend };
     }
 
     const apiCalls = getApiCalls(

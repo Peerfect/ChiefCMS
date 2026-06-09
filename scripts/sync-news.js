@@ -123,11 +123,54 @@ function transformArticle(article, cid) {
     }
   }
 
+  // HTML 实体反转义
+  function unescapeHtml(str) {
+    if (!str) return '';
+    return str
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&apos;/g, "'");
+  }
+
+  // 从 HTML 内容中提取纯文本摘要
+  function extractDescription(html, maxLen = 250) {
+    if (!html) return '';
+    const text = html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    return text.substring(0, maxLen);
+  }
+
+  const rawContent = unescapeHtml(article.content || article.summary || '');
+  const content = t2s(rawContent);
+  
+  // 把封面图插入第一段之后，让详情页有图片
+  let finalContent = content;
+  if (img) {
+    const imgTag = `<p style="text-align:center;"><img src="${img}" alt="${t2s(article.title || '')}" style="width:50%;height:auto;border-radius:6px;margin:15px auto;display:block;"></p>`;
+    // 找到第一个 </p> 的位置，插入图片到其后
+    const firstPEnd = content.indexOf('</p>');
+    if (firstPEnd !== -1) {
+      finalContent = content.substring(0, firstPEnd + 4) + '\n' + imgTag + '\n' + content.substring(firstPEnd + 4);
+    } else {
+      finalContent = imgTag + '\n' + content;
+    }
+  }
+
+  // 优先用 summary，没有则从 content 提取
+  let description = '';
+  if (article.summary) {
+    description = t2s(article.summary).substring(0, 250);
+  } else {
+    description = extractDescription(content, 250);
+  }
+
   return {
     title: t2s(article.title || ''),
     shortTitle: t2s((article.title || '').substring(0, 30)),
-    description: t2s((article.summary || '').substring(0, 250)),
-    content: t2s(article.content || article.summary || ''),
+    description: description,
+    content: finalContent,
     img: img.substring(0, 250),
     cid: cid,
     status: 0, // 0=已发布

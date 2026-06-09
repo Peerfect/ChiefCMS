@@ -17,7 +17,7 @@
         <div class="main center mt-3 flex gap-20">
             <!-- 最新文?-->
             <article class="article-index">
-                <div class="bg-fff radius-6 pd-15 mb-1 f-14 c-999">
+                <div class="bg-fff radius-6 pd-15 f-14 c-999" style="margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;">
                     <i class="ico-20 ico-home pos-r t-3"></i>
                     <a class="" href="/">首页</a> /
                     {{each position}}
@@ -28,9 +28,9 @@
                         {{/each}}
                 </div>
 
-                <div class="bg-fff radius-6 pd-25">
+                <div class="bg-fff radius-6 pd-25" style="padding-top:5px;border-top-left-radius:0;border-top-right-radius:0;">
                     <header class="border-b pos-r">
-                        <h2 class="f-26 c-252933  bold mt-10">
+                        <h2 class="f-26 c-252933 bold" style="margin-top:5px;">
                             <!-- <i class="ico-20 ico-speech pos-r t-4 ml-4 mr-4" id="audio"></i> -->
                             {{article.title}}
                         </h2>
@@ -42,9 +42,10 @@
                                 <i class="ico-20 ico-view pos-r t-5 ml-4"></i> 阅读（{{article.pv}}）
                                 <!-- <i class="ico-20 ico-zan pos-r t-4 ml-4"></i>点赞（95）-->
                             </span>
-                            <button id="favorite-btn" class="el-button el-button--small" data-article-id="{{article.id}}">
-                                <i class="ico-20 ico-star pos-r t-4 mr-1"></i>
-                                <span id="favorite-text">收藏</span>
+                            <button id="favorite-btn" data-article-id="{{article.id}}" style="background:none;border:none;cursor:pointer;padding:8px;font-size:26px;line-height:1;color:#ccc;transition:all 0.3s ease;" title="收藏">
+                                <svg id="favorite-heart" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
                             </button>
                         </p>
                         {{each article.tags}}
@@ -86,6 +87,35 @@
                     <% include('./partials/comment-section.html') %>
                 </div>
 
+                <!-- 为您推荐 -->
+                {{if randomRecommend && randomRecommend.length > 0}}
+                <div class="bg-fff radius-6 mt-1 pd-25">
+                    <h3 style="font-size:18px;font-weight:bold;margin-bottom:20px;padding-left:10px;border-left:3px solid #e67e22;">为您推荐</h3>
+                    <div class="recommend-grid">
+                        {{each randomRecommend}}
+                        <a href="{{$value.path}}/article-{{$value.id}}.html" class="recommend-item" title="{{$value.title}}">
+                            <div class="recommend-img">
+                                <img src="{{$value.img}}" alt="{{$value.title}}" />
+                            </div>
+                            <p class="recommend-title">{{$value.title}}</p>
+                        </a>
+                        {{/each}}
+                    </div>
+                </div>
+
+                <style>
+                .recommend-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+                .recommend-item { text-decoration: none; color: #333; transition: transform 0.2s; }
+                .recommend-item:hover { transform: translateY(-2px); }
+                .recommend-img { width: 100%; aspect-ratio: 16/10; overflow: hidden; border-radius: 4px; }
+                .recommend-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+                .recommend-item:hover .recommend-img img { transform: scale(1.05); }
+                .recommend-title { font-size: 13px; line-height: 1.5; margin-top: 8px; color: #333; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+                .recommend-item:hover .recommend-title { color: #e67e22; }
+                @media (max-width: 768px) { .recommend-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+                </style>
+                {{/if}}
+
             </article>
         </div>
     </main>
@@ -101,16 +131,18 @@
 
     <script src="{{static_url}}/js/katelog.min.js"></script>
     <script>
-        const katelogIns = new katelog({
-            contentEl: 'article',
-            catelogEl: 'article-outline',
-            linkClass: 'k-catelog-link',
-            linkActiveClass: 'k-catelog-link-active',
-            selector: ['h2', 'h3', 'h4', 'h5', 'h6'],
-            supplyTop: 20,
-            active: function (el) {
-            }
-        });
+        try {
+            const katelogIns = new katelog({
+                contentEl: 'article',
+                catelogEl: 'article-outline',
+                linkClass: 'k-catelog-link',
+                linkActiveClass: 'k-catelog-link-active',
+                selector: ['h2', 'h3', 'h4', 'h5', 'h6'],
+                supplyTop: 20,
+                active: function (el) {
+                }
+            });
+        } catch(e) {}
         // const html = '<h2>动态添加的标题</h2>'
         // katelogIns.contentEl.insertAdjacentHTML('afterBegin', html);
         // katelogIns.rebuild();
@@ -138,111 +170,36 @@
 
         // 收藏功能
         const favoriteBtn = document.getElementById('favorite-btn');
-        const favoriteText = document.getElementById('favorite-text');
         let isFavorited = false;
 
-        async function checkFavorite() {
-            const ut = document.cookie.replace(/(?:(?:^|.*;\s*)ut\s*\=\s*([^;]*).*$)|^.*$/, '$1');
-            if (!ut) {
-                return;
-            }
-            
-            try {
-                const articleId = favoriteBtn.getAttribute('data-article-id');
-                const response = await fetch('/member/v1/favorites');
-                const result = await response.json();
-                if (result.code === 200 && result.data.list) {
-                    const favorited = result.data.list.some(item => item.article_id == articleId);
-                    if (favorited) {
-                        isFavorited = true;
-                        favoriteBtn.classList.add('el-button--warning');
-                        favoriteBtn.classList.remove('el-button--default');
-                        favoriteBtn.classList.remove('el-button--primary');
-                        favoriteText.textContent = '已收藏';
-                    }
-                }
-            } catch (error) {
-                console.error('检查收藏状态失败',', error);
-            }
+        function updateFavoriteStyle() {
+            favoriteBtn.style.color = isFavorited ? '#e74c3c' : '#ccc';
+            favoriteBtn.style.transform = isFavorited ? 'scale(1.15)' : 'scale(1)';
+            favoriteBtn.title = isFavorited ? '取消收藏' : '收藏';
         }
 
         async function toggleFavorite() {
             const articleId = favoriteBtn.getAttribute('data-article-id');
-            const articleTitle = document.querySelector('h2').textContent;
             
-            const ut = document.cookie.replace(/(?:(?:^|.*;\s*)ut\s*\=\s*([^;]*).*$)|^.*$/, '$1');
-            if (!ut) {
-                alert('请先登录');
-                window.location.href = '/user/login.html';
-                return;
+            // 用 localStorage 存储收藏状态，无需登录
+            const key = 'favorite_' + articleId;
+            if (isFavorited) {
+                localStorage.removeItem(key);
+                isFavorited = false;
+            } else {
+                localStorage.setItem(key, '1');
+                isFavorited = true;
             }
-            
-            try {
-                let response;
-                if (isFavorited) {
-                    const favoriteId = await getFavoriteId(articleId);
-                    if (favoriteId) {
-                        response = await fetch('/member/v1/favorite/delete?id=' + favoriteId, {
-                            method: 'GET',
-                            credentials: 'include'
-                        });
-                    } else {
-                        alert('取消收藏失败');
-                        return;
-                    }
-                } else {
-                    response = await fetch('/member/v1/favorite', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                            articleId: articleId,
-                            articleTitle: articleTitle,
-                            articleCover: '',
-                            articleSummary: '',
-                            articleUrl: window.location.href
-                        })
-                    });
-                }
-
-                const result = await response.json();
-                if (result.code === 200) {
-                    isFavorited = !isFavorited;
-                    if (isFavorited) {
-                        favoriteBtn.classList.add('el-button--warning');
-                        favoriteBtn.classList.remove('el-button--default');
-                        favoriteBtn.classList.remove('el-button--primary');
-                        favoriteText.textContent = '已收藏';
-                        alert('收藏成功');
-                    } else {
-                        favoriteBtn.classList.remove('el-button--warning');
-                        favoriteBtn.classList.add('el-button--default');
-                        favoriteText.textContent = '收藏';
-                        alert('已取消收藏');
-                    }
-                } else {
-                    alert(result.msg || '操作失败');
-                }
-            } catch (error) {
-                console.error('收藏操作失败:', error);
-                alert('操作失败，请稍后重试');
-            }
+            updateFavoriteStyle();
         }
 
-        async function getFavoriteId(articleId) {
-            try {
-                const response = await fetch('/member/v1/favorites');
-                const result = await response.json();
-                if (result.code === 200 && result.data.list) {
-                    const favorite = result.data.list.find(item => item.article_id == articleId);
-                    return favorite ? favorite.id : null;
-                }
-                return null;
-            } catch (error) {
-                console.error('获取收藏ID失败:', error);
-                return null;
+        // 检查本地收藏状态
+        function checkFavorite() {
+            const articleId = favoriteBtn.getAttribute('data-article-id');
+            const key = 'favorite_' + articleId;
+            if (localStorage.getItem(key)) {
+                isFavorited = true;
+                updateFavoriteStyle();
             }
         }
 
