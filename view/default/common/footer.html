@@ -8,6 +8,7 @@
     <div class="footer-bottom center">
         <div class="footer-bottom-inner">
             <span><a href="/" style="color:#fff;text-decoration:none;font-weight:bold;">{{site.name}}</a>（{{site.domain}}）</span>
+            <a class="footer-gongan-link" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=62072502000170" target="_blank" rel="nofollow noopener"><img src="/uploads/default/gongan.png" alt="公安备案">甘公网安备62072502000170号</a>
             <span>Copyright © 2022 2023 All Rights Reserved <a href="https://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener" style="color:#aaa;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#6d6de6'" onmouseout="this.style.color='#aaa'">{{site.icp}}</a></span>
         </div>
     </div>
@@ -44,6 +45,22 @@
     align-items: center;
     font-size: 13px;
     color: #aaa;
+}
+.footer-gongan-link {
+    display: inline-flex;
+    align-items: center;
+    color: #aaa;
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+.footer-gongan-link:hover {
+    color: #6d6de6;
+}
+.footer-gongan-link img {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
 }
 </style>
 {{include './debug.html'}}
