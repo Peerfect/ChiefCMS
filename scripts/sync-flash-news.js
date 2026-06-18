@@ -79,7 +79,7 @@ async function fetchFlashNews() {
 // 从鉅亨網获取快讯作为备选
 async function fetchCnyesFlash() {
   try {
-    const url = 'https://api.cnyes.com/media/api/v1/newslist/category/headline?page=1&limit=30';
+    const url = 'https://api.chiefbao.com/api/newslist/category/headline?page=1&limit=30';
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',

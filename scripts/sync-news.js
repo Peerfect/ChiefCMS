@@ -69,7 +69,7 @@ async function getCategoryMap() {
 // 从鉅亨網 API 获取新闻列表
 async function fetchCnyesNews(category, page = 1, limit = 20) {
   try {
-    const url = `https://api.cnyes.com/media/api/v1/newslist/category/${category}?page=${page}&limit=${limit}`;
+    const url = `https://api.chiefbao.com/api/newslist/category/${category}?page=${page}&limit=${limit}`;
     
     const response = await fetch(url, {
       headers: {

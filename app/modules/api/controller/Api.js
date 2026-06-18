@@ -92,9 +92,8 @@ class ApiController extends Controller {
   async getArticleListByCid(req, res, next) {
     try {
       const { cid, attr, len } = req.query;
-      let params = { cid, attr, len: +len };
-      const data = await Api.getArticleListByCid(params);
-      res.json(this.success(data));
+      const data = await Api.getArticleListByCid(+cid, +len || 5, attr || "");
+      res.json(this.success({ data }));
     } catch (error) {
       next(error);
     }

@@ -38,6 +38,7 @@ class HomeController extends Controller {
         tag: tag || [],
         friendlink: friendlink || [],
         recommendImgs: [],
+        insuranceArticles: [],
         ...data,
       };
       res.render(`${template}/${defaultView}`, { ...safeData, nav, cate: {} });
