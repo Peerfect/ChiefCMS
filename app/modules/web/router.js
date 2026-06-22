@@ -12,7 +12,7 @@ export default async (app, router, config) => {
 
   // robots.txt
   router.get("/robots.txt", (req, res) => {
-    const domain = Chan.config.data?.site?.domain || req.get("host");
+    const domain = req.get("host") || "www.chiefbao.com";
     res.set("Content-Type", "text/plain");
     res.send(`User-agent: *
 Allow: /
@@ -22,8 +22,14 @@ Disallow: /oss/
 Disallow: /api/
 Disallow: /member/
 
-Sitemap: ${req.protocol}://${domain}/sitemap.xml
+Sitemap: https://${domain}/sitemap.xml
 `);
+  });
+
+  // IndexNow key 验证文件（Bing/IndexNow 主动推送需要，否则推送返回 403）
+  router.get("/chancms2026indexnow.txt", (req, res) => {
+    res.set("Content-Type", "text/plain");
+    res.send("chancms2026indexnow");
   });
 
   // sitemap.xml 动态生成

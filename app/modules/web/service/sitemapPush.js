@@ -7,22 +7,32 @@
 class SitemapPushService {
   constructor() {
     this.lastPushTime = null;
-    this.pushInterval = 24 * 60 * 60 * 1000; // 24小时
     this.timer = null;
   }
 
   /**
-   * 启动定时推送
+   * 启动定时推送：每天 0 点执行一次
    */
   start() {
-    // 启动后延迟5分钟执行第一次推送（等待服务完全启动）
-    setTimeout(() => {
-      this.pushAll();
-      // 之后每24小时推送一次
-      this.timer = setInterval(() => this.pushAll(), this.pushInterval);
-    }, 5 * 60 * 1000);
+    this.scheduleNextRun();
+    console.log("[SitemapPush] 已启动，每天 00:00 自动推送一次");
+  }
 
-    console.log("[SitemapPush] 已启动，每24小时自动推送一次");
+  /**
+   * 计算到下一个 0 点的延迟并定时执行，执行后重新排期
+   */
+  scheduleNextRun() {
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(24, 0, 0, 0); // 下一个 0 点（服务器本地时间）
+    const delay = next.getTime() - now.getTime();
+
+    console.log(`[SitemapPush] 下次推送时间: ${next.toLocaleString()}`);
+
+    this.timer = setTimeout(() => {
+      this.pushAll();
+      this.scheduleNextRun(); // 推送后排下一天
+    }, delay);
   }
 
   /**
@@ -30,7 +40,7 @@ class SitemapPushService {
    */
   stop() {
     if (this.timer) {
-      clearInterval(this.timer);
+      clearTimeout(this.timer);
       this.timer = null;
     }
   }
@@ -112,6 +122,7 @@ class SitemapPushService {
         body: JSON.stringify({
           host: domain,
           key: "chancms2026indexnow",
+          keyLocation: `https://${domain}/chancms2026indexnow.txt`,
           urlList: urls,
         }),
         signal: AbortSignal.timeout(10000),
@@ -127,9 +138,26 @@ class SitemapPushService {
   }
 
   /**
+   * 确保百度推送进度表存在（记录已推送过的文章，避免重复、支持按最老→最新顺序推进）
+   */
+  async ensurePushTable() {
+    const exists = await Chan.db.schema.hasTable("cms_seo_push");
+    if (!exists) {
+      await Chan.db.schema.createTable("cms_seo_push", (t) => {
+        t.increments("id").primary();
+        t.integer("articleId").notNullable().comment("文章id");
+        t.string("engine", 20).notNullable().defaultTo("baidu").comment("搜索引擎");
+        t.string("url", 500).comment("推送的URL");
+        t.dateTime("pushedAt").comment("推送时间");
+        t.index(["engine", "articleId"], "idx_engine_article");
+      });
+    }
+  }
+
+  /**
    * 百度主动推送（普通收录）
-   * 需要在百度站长平台获取 token
-   * https://ziyuan.baidu.com/linksubmit/index
+   * 从最老的文章开始，按时间从早到晚每天推 N 条，推过的不再重复，逐步覆盖全站。
+   * 需要在百度站长平台获取 token：https://ziyuan.baidu.com/linksubmit/index
    */
   async pingBaidu(domain) {
     try {
@@ -138,38 +166,65 @@ class SitemapPushService {
         return "跳过（未配置 baiduPushToken）";
       }
 
-      // 获取最新更新的文章URL（最近24小时内更新的）
-      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      // 每天推送数量（默认10条，可用 BAIDU_PUSH_LIMIT 调整）
+      const baiduLimit = parseInt(process.env.BAIDU_PUSH_LIMIT) || 10;
+
+      await this.ensurePushTable();
+
+      // 已推送过的文章 id
+      const pushedIds = await Chan.db("cms_seo_push")
+        .where("engine", "baidu")
+        .pluck("articleId");
+
+      // 取最老的、尚未推送的文章，按 createdAt 从早到晚
       const articles = await Chan.db("cms_article as a")
         .select(["a.id", "c.path"])
         .leftJoin("cms_category as c", "a.cid", "c.id")
         .where("a.status", 0)
-        .where("a.createdAt", ">", yesterday)
-        .orderBy("a.createdAt", "desc")
-        .limit(100);
+        .whereNotIn("a.id", pushedIds.length ? pushedIds : [0])
+        .orderBy("a.createdAt", "asc")
+        .limit(baiduLimit);
 
       if (articles.length === 0) {
-        return "跳过（无新文章）";
+        return "跳过（全部已推送完毕）";
       }
 
-      const urls = articles.map(a => `https://${domain}${a.path}/article-${a.id}.html`);
-
+      let batch = articles.map(a => ({
+        id: a.id,
+        url: `https://${domain}${a.path}/article-${a.id}.html`,
+      }));
       const apiUrl = `http://data.zz.baidu.com/urls?site=https://${domain}&token=${token}`;
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: urls.join("\n"),
-        signal: AbortSignal.timeout(10000),
-      });
 
-      const data = await res.json();
-      if (data.success) {
-        return `成功推送 ${data.success} 条URL`;
-      } else if (data.remain !== undefined) {
-        return `成功推送 ${data.success || 0} 条，今日剩余配额 ${data.remain}`;
-      } else {
+      // 百度每日配额有限，整批超过剩余配额会返回 over quota（一条都不进）。
+      // 因此遇到 over quota 时自动减半重试，尽量把能推的先推进去。
+      while (batch.length > 0) {
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: batch.map(b => b.url).join("\n"),
+          signal: AbortSignal.timeout(10000),
+        });
+        const data = await res.json();
+
+        if (data.success !== undefined) {
+          // 记录本批已推送，下次从更新的文章接着推
+          const now = new Date();
+          await Chan.db("cms_seo_push").insert(
+            batch.map(b => ({ articleId: b.id, engine: "baidu", url: b.url, pushedAt: now }))
+          );
+          return `成功推送 ${data.success} 条（最老优先 id:${batch[0].id}~${batch[batch.length - 1].id}），今日剩余配额 ${data.remain ?? "未知"}`;
+        }
+
+        if (data.message === "over quota" && batch.length > 1) {
+          // 每次减 1 重试，精确推到剩余配额上限，不浪费配额
+          batch = batch.slice(0, batch.length - 1);
+          continue;
+        }
+
         return `响应: ${JSON.stringify(data)}`;
       }
+
+      return "跳过（配额不足，无法推送）";
     } catch (err) {
       return `失败: ${err.message}`;
     }
