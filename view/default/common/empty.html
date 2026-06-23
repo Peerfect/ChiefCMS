@@ -1,0 +1,50 @@
+<div class="tt-empty">
+    <svg class="tt-empty-ico" width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="60" cy="100" rx="42" ry="7" fill="#ececfb" />
+        <rect x="28" y="30" width="64" height="50" rx="6" fill="#f3f3fb" stroke="#cfcff4" stroke-width="2" />
+        <rect x="38" y="44" width="30" height="4" rx="2" fill="#cfcff4" />
+        <rect x="38" y="54" width="44" height="4" rx="2" fill="#dedef7" />
+        <rect x="38" y="64" width="22" height="4" rx="2" fill="#dedef7" />
+        <circle cx="80" cy="70" r="18" fill="#fff" stroke="#6d6de6" stroke-width="3" />
+        <line x1="92" y1="82" x2="103" y2="93" stroke="#6d6de6" stroke-width="4" stroke-linecap="round" />
+        <line x1="74" y1="70" x2="86" y2="70" stroke="#e74c3c" stroke-width="3" stroke-linecap="round" />
+    </svg>
+    <div class="tt-empty-title">灯火阑珊处，文章一点无</div>
+    <div class="tt-empty-desc">该栏目暂时还没有内容，去其他栏目逛逛吧~</div>
+    <div class="tt-empty-actions">
+        <a href="/" class="tt-empty-btn">返回首页</a>
+    </div>
+    {{if nav && nav.length > 0}}
+    <div class="tt-empty-hot">
+        <span class="tt-empty-hot-label">热门栏目：</span>
+        {{each nav}}
+        {{if $value.status == 0 && $value.pinyin != 'home'}}
+        <a class="tt-empty-chip" href="{{$value.path}}/{{$value.type==0 ? 'index.html' : 'page.html'}}" title="{{$value.name}}">{{$value.name}}</a>
+        {{/if}}
+        {{/each}}
+    </div>
+    {{/if}}
+</div>
+
+<style>
+    .tt-empty { text-align: center; padding: 55px 20px 65px; }
+    .tt-empty-ico { display: block; margin: 0 auto 18px; }
+    .tt-empty-title { font-size: 20px; font-weight: 700; color: #444; margin-bottom: 8px; }
+    .tt-empty-desc { font-size: 14px; color: #999; margin-bottom: 24px; }
+    .tt-empty-actions { margin-bottom: 30px; }
+    .tt-empty-btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        height: 42px; padding: 0 30px; border-radius: 22px;
+        background: #6d6de6; color: #fff; font-size: 15px; text-decoration: none;
+        transition: all .25s ease;
+    }
+    .tt-empty-btn:hover { background: #5a5ad8; transform: translateY(-2px); }
+    .tt-empty-hot { border-top: 1px dashed #eee; padding-top: 22px; max-width: 760px; margin: 0 auto; }
+    .tt-empty-hot-label { font-size: 14px; color: #999; }
+    .tt-empty-chip {
+        display: inline-block; margin: 5px 6px; padding: 6px 16px; border-radius: 18px;
+        background: #f6f6fb; color: #555; font-size: 13px; text-decoration: none;
+        transition: all .2s ease;
+    }
+    .tt-empty-chip:hover { background: #6d6de6; color: #fff; }
+</style>

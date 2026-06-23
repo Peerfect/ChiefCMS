@@ -10,10 +10,11 @@ config.data = config.data || {};
 export default () => {
   return async (req, res, next) => {
     try {
-      // 缓存优化：直接读取，不重复查询
+      // 缓存优化：命中缓存时也要把数据写回 locals，否则进程重启后 app.locals 为空会导致 site/category undefined
       if (CACHE) {
         const cachedData = cache.get(WEB_CACHE_KEY);
         if (cachedData) {
+          Object.assign(req.app.locals, cachedData);
           return next();
         }
       }

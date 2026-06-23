@@ -43,13 +43,13 @@ Sitemap: https://${domain}/sitemap.xml
         .select("id", "name", "path")
         .where("status", 0);
 
-      // 获取最新500篇文章
+      // 获取所有已发布文章（sitemap 上限 5 万条）
       const articles = await Chan.db("cms_article as a")
         .select(["a.id", "a.title", "a.createdAt", "a.updatedAt", "c.path"])
         .leftJoin("cms_category as c", "a.cid", "c.id")
         .where("a.status", 0)
         .orderBy("a.createdAt", "desc")
-        .limit(500);
+        .limit(50000);
 
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
       xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';

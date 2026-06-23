@@ -1,47 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 
 <head>
     <meta charset="utf-8">
-    <meta name="description" content="ChanCMS—404页面">
-    <meta name="keywords" content="ChanCMS,chanyue-cms" />
-    <meta property="og:title" content="ChanCMS-404" />
-    <meta property="og:description" content="ChanCMS,chanyue-cms" />
-    <title>ChanCMS-404</title>
-    <link rel="stylesheet" href="/public/view/default/css/saduo@1.1.1.css" />
+    <title>页面未找到 - {{site.name}}</title>
+    <meta name="robots" content="noindex,nofollow" />
+    {{include './common/meta.html'}}
+    <style>
+        .nf-wrap { max-width: 1280px; margin: 30px auto 50px; padding: 0 15px; }
+        .nf-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 60px 20px 70px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .04);
+        }
+        .nf-code {
+            font-size: 120px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: 4px;
+            background: linear-gradient(90deg, #6d6de6, #e74c3c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .nf-title { font-size: 24px; color: #333; font-weight: 700; margin-bottom: 10px; }
+        .nf-desc { font-size: 15px; color: #888; line-height: 1.8; margin-bottom: 28px; }
+        .nf-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+        .nf-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            height: 44px; padding: 0 28px; border-radius: 24px;
+            font-size: 15px; text-decoration: none; transition: all .25s ease;
+        }
+        .nf-btn-primary { background: #6d6de6; color: #fff; }
+        .nf-btn-primary:hover { background: #5a5ad8; transform: translateY(-2px); }
+        .nf-btn-ghost { background: #fff; color: #6d6de6; border: 1px solid #6d6de6; }
+        .nf-btn-ghost:hover { background: #f3f3ff; transform: translateY(-2px); }
+        .nf-hot { border-top: 1px dashed #eee; padding-top: 28px; }
+        .nf-hot-label { font-size: 14px; color: #999; margin-bottom: 16px; }
+        .nf-chips { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .nf-chip {
+            display: inline-block; padding: 8px 18px; border-radius: 20px;
+            background: #f6f6fb; color: #555; font-size: 14px; text-decoration: none;
+            transition: all .2s ease;
+        }
+        .nf-chip:hover { background: #6d6de6; color: #fff; }
+        @media (max-width: 768px) {
+            .nf-code { font-size: 80px; }
+            .nf-card { padding: 40px 15px 50px; }
+        }
+    </style>
 </head>
 
 <body>
-    <style>
-        .wrapper {
-            width: 100%;
-            max-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
+    {{include './common/header.html'}}
 
-        .f-80 {
-            font-size: 120px;
-            color: #2662f8;
-        }
+    <main class="nf-wrap">
+        <div class="nf-card">
+            <div class="nf-code">404</div>
+            <div class="nf-title">抱歉，您访问的页面走丢了</div>
+            <p class="nf-desc">
+                页面可能已被删除、移动，或链接地址有误。<br>
+                别担心，您可以返回首页，或从下方热门栏目继续浏览财经资讯。
+            </p>
+            <div class="nf-btns">
+                <a class="nf-btn nf-btn-primary" href="/">返回首页</a>
+                <a class="nf-btn nf-btn-ghost" href="javascript:history.back();">返回上一页</a>
+            </div>
 
-        .btn-gohome {
-            font-size: 30px;
-            color: #295bd8;
-        }
-    </style>
-    <section class="wrapper">
-        <h1 class="text-c f-80">ChanCMS-404</h1>
-        <p class="f-23 text-c mt-20">访问路径未找到，路径参数异常，请求路径: {{url}}</p>
-        <p class="text-c mt-20">
-            <span class="btn-gohome">
-                <a class="c-fff f-14" href="/">去首页</a>
-                <a class="c-fff f-14" href="https://www.chancms.top/" target="_blank">ChanCMS</a>
-            </span>
-        </p>
-    </section>
+            {{if nav && nav.length > 0}}
+            <div class="nf-hot">
+                <div class="nf-hot-label">热门栏目</div>
+                <div class="nf-chips">
+                    {{each nav}}
+                    {{if $value.status == 0 && $value.pinyin != 'home'}}
+                    <a class="nf-chip" href="{{$value.path}}/{{$value.type==0 ? 'index.html' : 'page.html'}}" title="{{$value.name}}">{{$value.name}}</a>
+                    {{/if}}
+                    {{/each}}
+                </div>
+            </div>
+            {{/if}}
+        </div>
+    </main>
+
+    {{include './common/footer.html'}}
+    {{include './common/js.html'}}
 </body>
 
 </html>
