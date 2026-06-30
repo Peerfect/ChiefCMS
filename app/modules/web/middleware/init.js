@@ -58,8 +58,7 @@ export default () => {
       try {
         const ads = await Chan.db("cms_article")
           .select("id", "title", "img", "link")
-          .where("cid", 33)
-          .where("status", 1);
+          .where("cid", 33);
         localsData.ads = ads || [];
       } catch (e) {
         localsData.ads = [];

@@ -7,7 +7,7 @@
 {{include './common/meta.html'}}
     <style>
         .index-top { display: flex; gap: 20px; margin-bottom: 20px; margin-top: 20px; align-items: flex-start; }
-        .index-top-left { flex: 1; display: flex; gap: 15px; align-items: flex-start; }
+        .index-top-left { flex: 1; min-width: 0; display: flex; gap: 15px; align-items: flex-start; }
         .index-top-left .top-banner { width: 520px; height: 312px; flex-shrink: 0; position: relative; border-radius: 6px; overflow: hidden; cursor: pointer; margin-top: -5px; }
         .index-top-left .top-banner .banner-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-size: 100% 100%; background-repeat: no-repeat; transition: opacity 0.5s, transform 0.3s ease; }
         .index-top-left .top-banner:hover .banner-bg { transform: scale(1.05); }
@@ -15,7 +15,7 @@
         .index-top-left .top-banner .banner-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 3; }
         .index-top-left .top-banner .banner-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; }
         .index-top-left .top-banner .banner-dot.active { background: #fff; }
-        .index-top-left .top-articles { flex: 1; overflow: hidden; margin-top: -5px; }
+        .index-top-left .top-articles { flex: 1; min-width: 0; overflow: hidden; margin-top: -5px; }
         .index-top-left .top-articles h2 { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
         .index-top-left .top-articles h2 a { color: #333; }
         .index-top-left .top-articles h2 a:hover { color: #6d6de6; }

@@ -66,16 +66,18 @@ const home = {
     if (!config || Object.keys(config).length === 0) {
       const [article, banner, recommend, imgs, news, hotRecommend, latestArticles, insuranceArticles] = await Promise.all([
         common.getArticleListByCids({}),
-        // 轮播图：取外汇开户(cid=19)最新3条文章
-        Chan.db("cms_article")
-          .select(["id", "title", "img as imgUrl", "description as content"])
-          .where("cid", 19)
-          .where("status", 0)
-          .orderBy("createdAt", "desc")
-          .limit(3)
+        // 轮播图：从外汇相关栏目取最新有图文章
+        Chan.db("cms_article as a")
+          .select(["a.id", "a.title", "a.img as imgUrl", "a.description as content", "c.path"])
+          .leftJoin("cms_category as c", "a.cid", "c.id")
+          .whereIn("a.cid", [17, 18, 19, 20, 21, 22, 66, 67, 68, 69, 70, 72])
+          .where("a.status", 0)
+          .whereNot("a.img", "")
+          .orderBy("a.createdAt", "desc")
+          .limit(5)
           .then(list => list.map(a => ({
             ...a,
-            linkUrl: `/whkh/article-${a.id}.html`
+            linkUrl: `${a.path}/article-${a.id}.html`
           }))),
         // 右侧美股资讯：从美股(cid=25)获取
         Chan.db("cms_article as a")
